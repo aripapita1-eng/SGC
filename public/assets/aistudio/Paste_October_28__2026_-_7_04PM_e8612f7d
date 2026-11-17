@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SENA · Gestión Documental Integrada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080C16;--bg2:#0d1424;--lime:#39A900;--neon:#00FF66;--cyan:#00E5FF;--mint:#3EF5B5;
+--text:#d7ffe6;--dim:#7fa292;--amber:#ffb020;--red:#ff3860}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',ui-monospace,Consolas,monospace;font-size:14px}
+h1,h2,h3,.orb{font-family:'Orbitron','Share Tech Mono',sans-serif;letter-spacing:.08em}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:300;
+ background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+button,select{font:inherit;color:inherit}
+.dim{color:var(--dim)}
+
+/* ---------- LOCK SCREEN ---------- */
+#lock{position:fixed;inset:0;z-index:200}
+.door{position:absolute;top:0;bottom:0;width:50%;z-index:1;transition:transform 1.4s cubic-bezier(.7,0,.2,1);
+ background:repeating-linear-gradient(90deg,transparent 0 58px,rgba(57,169,0,.09) 58px 60px),
+ radial-gradient(circle at 50% 50%,#0f1a2e,#080C16 70%)}
+.door.l{left:0;border-right:2px solid var(--neon);box-shadow:4px 0 30px rgba(0,255,102,.4)}
+.door.r{right:0;border-left:2px solid var(--neon);box-shadow:-4px 0 30px rgba(0,255,102,.4)}
+#lock.open{pointer-events:none}
+#lock.open .l{transform:translateX(-101%)}
+#lock.open .r{transform:translateX(101%)}
+#fx{position:absolute;inset:0;z-index:2;pointer-events:none;transition:opacity .5s}
+.core{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center;transition:opacity .5s}
+#lock.open #fx,#lock.open .core{opacity:0}
+.iso{width:min(240px,50vw);color:var(--neon);--charge:0;opacity:calc(.28 + var(--charge)*.72);
+ filter:grayscale(calc(1 - var(--charge))) drop-shadow(0 0 calc(var(--charge)*22px) var(--neon));transition:all .8s}
+.iso.flash{animation:flash .8s 2}
+@keyframes flash{50%{filter:drop-shadow(0 0 60px #fff) brightness(1.8)}}
+#ring{stroke-dasharray:565.5;stroke-dashoffset:565.5;transition:stroke-dashoffset .9s ease}
+#status{color:var(--cyan);letter-spacing:.15em;font-size:.85rem}
+.switches{display:flex;flex-direction:column;gap:12px;align-items:center}
+.cs{display:flex;align-items:center;gap:16px;width:min(540px,92vw);padding:12px 16px;cursor:pointer;text-align:left;
+ background:rgba(57,169,0,.08);border:1px solid var(--lime);transition:.3s}
+.cs:disabled{opacity:.32;cursor:not-allowed}
+.cs:not(:disabled):not([aria-checked=true]){animation:pulse 1.5s infinite}
+@keyframes pulse{50%{box-shadow:0 0 18px rgba(0,255,102,.55)}}
+.cs[aria-checked=true]{border-color:var(--neon);background:rgba(0,255,102,.14);box-shadow:0 0 18px rgba(0,255,102,.35)}
+.track{flex:none;width:54px;height:26px;border:1px solid var(--dim);border-radius:20px;position:relative}
+.track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--dim);transition:.3s}
+.cs[aria-checked=true] .track{border-color:var(--neon)}
+.cs[aria-checked=true] .track::after{left:31px;background:var(--neon);box-shadow:0 0 12px var(--neon)}
+#granted{min-height:3.2em;color:var(--neon);font-size:clamp(.9rem,2.4vw,1.3rem);text-shadow:0 0 14px var(--neon)}
+.link{background:none;border:0;color:var(--dim);text-decoration:underline;cursor:pointer}
+
+/* ---------- HUD / DASHBOARD ---------- */
+#app[hidden]{display:none}
+#app{min-height:100vh;background:
+ radial-gradient(circle at 15% 0%,rgba(57,169,0,.12),transparent 40%),
+ radial-gradient(circle at 90% 100%,rgba(0,229,255,.08),transparent 40%),var(--bg)}
+.hud{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;padding:12px 20px;
+ background:rgba(8,12,22,.92);border-bottom:1px solid var(--lime);box-shadow:0 0 22px rgba(57,169,0,.3);position:sticky;top:0;z-index:50;backdrop-filter:blur(6px)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:48px;height:48px;color:var(--neon);filter:drop-shadow(0 0 8px var(--neon))}
+.brand h1{font-size:1rem;color:var(--neon)}
+.brand small{color:var(--dim)}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{border:1px solid rgba(57,169,0,.6);padding:6px 12px;min-width:140px}
+.kpi small{display:block;color:var(--dim);font-size:.7rem;text-transform:uppercase}
+.kpi b{font-family:Orbitron,sans-serif;color:var(--neon);font-size:1.15rem}
+.player{display:flex;align-items:center;gap:10px;border:1px solid var(--cyan);padding:6px 10px}
+.player small{display:block;color:var(--cyan);font-size:.65rem}
+.eq{display:flex;gap:2px;align-items:flex-end;height:22px}
+.eq span{width:4px;background:var(--neon);height:100%;transform-origin:bottom;animation:eq .9s infinite ease-in-out}
+.eq span:nth-child(2){animation-delay:.15s}.eq span:nth-child(3){animation-delay:.3s}
+.eq span:nth-child(4){animation-delay:.45s}.eq span:nth-child(5){animation-delay:.6s}
+@keyframes eq{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+.player.muted .eq span{animation-play-state:paused;transform:scaleY(.15)}
+.cbtn{cursor:pointer;color:var(--neon);background:rgba(57,169,0,.14);border:1px solid var(--neon);padding:7px 13px;
+ text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;transition:.2s;
+ clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.cbtn:hover,.cbtn:focus-visible{background:var(--neon);color:#031a0a;outline:none;filter:drop-shadow(0 0 8px var(--neon))}
+.hud-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%;justify-content:flex-end}
+select{background:var(--bg2);border:1px solid var(--lime);padding:6px 8px}
+.sysclock{color:var(--dim);margin-right:auto}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:20px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.pillar>h2{font-size:.95rem;color:var(--cyan);border-left:4px solid var(--neon);padding:4px 0 4px 10px;margin-bottom:14px;text-shadow:0 0 10px rgba(0,229,255,.5)}
+.panel{position:relative;margin-bottom:16px;border:1px solid rgba(57,169,0,.6);
+ background:linear-gradient(160deg,rgba(57,169,0,.09),rgba(0,229,255,.03));
+ box-shadow:0 0 16px rgba(57,169,0,.2) inset;animation:rise .6s both;
+ clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.panel>header{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid rgba(57,169,0,.35)}
+.panel h3{font-size:.72rem;color:var(--neon);text-transform:uppercase}
+.tgl{background:none;border:1px solid var(--lime);color:var(--neon);width:26px;height:26px;cursor:pointer}
+.body{padding:14px;max-height:1200px;overflow:hidden;transition:max-height .4s,padding .4s}
+.panel.collapsed .body{max-height:0;padding-top:0;padding-bottom:0}
+.big{font-family:Orbitron,sans-serif;font-size:2rem;color:var(--neon);text-shadow:0 0 14px var(--neon)}
+.feed{list-style:none;margin-top:10px;font-size:.75rem;color:var(--dim)}
+.feed li{padding:3px 0;border-bottom:1px dashed rgba(57,169,0,.25);animation:rise .4s both}
+.feed li b{color:var(--cyan)}
+.xp{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;margin:7px 0;font-size:.78rem}
+.bar{height:10px;border:1px solid var(--lime);background:rgba(0,0,0,.4)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lime),var(--neon));box-shadow:0 0 10px var(--neon);transition:width 1.2s ease}
+.xp b{color:var(--neon);text-align:right}
+.tree,.tree ul{list-style:none;margin-left:14px;border-left:1px dashed rgba(57,169,0,.5);padding-left:10px}
+.tree{margin-left:0;border:0;padding:0}
+.tree summary{cursor:pointer;color:var(--mint);padding:3px 0}
+.tree li{padding:2px 0;font-size:.8rem}.tree em{color:var(--cyan);font-style:normal}
+.donutwrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.donut{width:130px;flex:none}
+.dt{fill:none;stroke:rgba(57,169,0,.15);stroke-width:14}
+.donut text,.gauge text{fill:var(--text);text-anchor:middle}
+.lg{list-style:none;font-size:.78rem}.lg i{display:inline-block;width:10px;height:10px;margin-right:6px}
+.tl{list-style:none;border-left:2px solid var(--lime);margin-left:6px;padding-left:16px}
+.tl li{position:relative;padding:6px 0;opacity:.35;transition:.3s}
+.tl li.on{opacity:1}
+.tl li::before{content:"";position:absolute;left:-23px;top:11px;width:10px;height:10px;background:var(--bg);border:2px solid var(--neon);transform:rotate(45deg)}
+.tl li.on::before{background:var(--neon);box-shadow:0 0 10px var(--neon)}
+.tl b{color:var(--cyan);margin-right:8px}.tl small{display:block;color:var(--dim)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.74rem}
+th{color:var(--cyan);text-align:left;font-weight:400;text-transform:uppercase;border-bottom:1px solid var(--lime);padding:5px 4px}
+td{padding:5px 4px;border-bottom:1px solid rgba(57,169,0,.2)}
+.tag{padding:1px 6px;border:1px solid var(--c);color:var(--c);font-size:.7rem;white-space:nowrap}
+.gauge{width:100%;max-width:190px}
+.gt,.gv{fill:none;stroke-width:11}
+.gt{stroke:rgba(57,169,0,.18)}
+.gv{stroke-linecap:round;filter:drop-shadow(0 0 4px currentColor);transition:stroke-dasharray 1s}
+.gn{font-family:Orbitron,sans-serif;font-size:20px;fill:var(--neon)!important}
+.gl{font-size:7px;fill:var(--dim)!important}
+.steps{list-style:none;font-size:.8rem}.steps li{padding:3px 0}.ok{color:var(--neon)}.wait{color:var(--amber)}
+.hmcap{display:flex;justify-content:space-between;font-size:.68rem;color:var(--dim);margin:4px 0}
+.heat{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.hc{aspect-ratio:1;background:#0b1220;border:1px solid var(--c);box-shadow:inset 0 0 16px var(--c);color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+.hc:hover,.hc:focus-visible{filter:brightness(1.5);outline:none}
+#hmInfo{margin-top:10px;min-height:3.2em;font-size:.78rem;color:var(--text)}
+.twin{display:flex;gap:8px;justify-content:space-around;flex-wrap:wrap}
+.twin>div{text-align:center;flex:1;min-width:120px}
+.foot{padding:20px;text-align:center;color:var(--dim);font-size:.72rem}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important}}
+@media print{
+ :root{--bg:#fff;--bg2:#fff;--text:#111;--dim:#555;--neon:#1a7a00;--lime:#1a7a00;--cyan:#00607a;--mint:#1a7a00}
+ body::after,#lock,.hud-controls,.tgl,.player{display:none!important}
+ .hud{position:static;box-shadow:none}
+ .panel{clip-path:none;box-shadow:none;break-inside:avoid;animation:none}
+ .body{max-height:none!important}.bar i{background:#1a7a00;box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Símbolo del isotipo (PLACEHOLDER: reemplazar por el isotipo oficial del SENA) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="isoSym" viewBox="0 0 200 200">
+  <polygon points="100,26 164,63 164,137 100,174 36,137 36,63" fill="none" stroke="currentColor" stroke-width="6"/>
+  <text x="100" y="114" text-anchor="middle" font-size="38" font-weight="900" fill="currentColor" font-family="Orbitron,sans-serif">SENA</text>
+ </symbol>
+</svg>
+
+<!-- ================= PANTALLA DE INICIO ================= -->
+<section id="lock" aria-label="Pantalla de acceso">
+ <div class="door l"></div><div class="door r"></div>
+ <canvas id="fx"></canvas>
+ <div class="core">
+  <svg id="iso" class="iso" viewBox="0 0 200 200" role="img" aria-label="Isotipo SENA">
+   <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(57,169,0,.25)" stroke-width="4"/>
+   <circle id="ring" cx="100" cy="100" r="90" fill="none" stroke="currentColor" stroke-width="4" transform="rotate(-90 100 100)"/>
+   <use href="#isoSym" x="30" y="30" width="140" height="140"/>
+  </svg>
+  <p id="status">SISTEMA BLOQUEADO · ACTIVE LOS 3 NÚCLEOS EN SECUENCIA</p>
+  <div class="switches">
+   <button class="cs" role="switch" aria-checked="false"><span class="track"></span><span>[ACTIVAR NÚCLEO SGD - ISO 30301]</span></button>
+   <button class="cs" role="switch" aria-checked="false" disabled><span class="track"></span><span>[CARGAR FONDOS TVD - RADICADO AGN]</span></button>
+   <button class="cs" role="switch" aria-checked="false" disabled><span class="track"></span><span>[CALIBRAR MATRIZ DE RIESGO - NTC-ISO 31000]</span></button>
+  </div>
+  <h2 id="granted" aria-live="polite"></h2>
+  <button id="skip" class="link">Omitir intro</button>
+ </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<main id="app" hidden>
+ <header class="hud">
+  <div class="brand">
+   <svg viewBox="0 0 200 200" aria-hidden="true"><use href="#isoSym"/></svg>
+   <div><h1>SENA · GESTIÓN DOCUMENTAL</h1><small>SGD ISO 30301 · TVD / AGN · NTC-ISO 31000</small></div>
+  </div>
+  <div class="kpis">
+   <div class="kpi"><small>Nivel de madurez SGD</small><b id="kMad">—</b></div>
+   <div class="kpi"><small>Conformidad TVD</small><b id="kConf">—</b></div>
+   <div class="kpi"><small>Riesgos bajo control</small><b id="kRisk">—</b></div>
+  </div>
+  <div class="player" id="player">
+   <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+   <div><small>NOW PLAYING</small><span id="nowTxt">Timecop1983 - On the Run</span></div>
+   <button class="cbtn" id="mute" aria-pressed="false">MUTE</button>
+  </div>
+  <div class="hud-controls">
+   <span class="sysclock" id="clock"></span>
+   <label>Periodo <select id="fPer"></select></label>
+   <label>Dependencia <select id="fDep"></select></label>
+   <button class="cbtn" id="expCsv">Exportar CSV</button>
+   <button class="cbtn" id="expPdf">Exportar PDF</button>
+  </div>
+ </header>
+
+ <div class="grid">
+  <!-- PILAR 1 -->
+  <section class="pillar">
+   <h2>01 · SISTEMA DE GESTIÓN DOCUMENTAL (ISO 30301)</h2>
+   <article class="panel"><header><h3>Captura y registro</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body">
+     <div class="big" id="docCount">0</div><div class="dim">DOCUMENTOS CAPTURADOS · ID ÚNICO AUTOMÁTICO</div>
+     <div class="xp"><span>Metadatos</span><div class="bar"><i data-w="96"></i></div><b>96%</b></div>
+     <ul class="feed" id="feed"></ul>
+    </div></article>
+   <article class="panel"><header><h3>Cuadro de clasificación documental</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body">
+     <ul class="tree">
+      <li><details open><summary>100 · Dirección General</summary><ul>
+        <li>100.01 Actas de Consejo Directivo <em>v2.1</em></li><li>100.02 Resoluciones <em>v3.0</em></li></ul></details></li>
+      <li><details><summary>200 · Secretaría General</summary><ul>
+        <li>200.01 Historias laborales <em>v1.4</em></li><li>200.02 Contratos <em>v2.2</em></li></ul></details></li>
+      <li><details><summary>300 · Regionales</summary><ul>
+        <li>300.01 Expedientes de aprendices <em>v1.9</em></li><li>300.02 Informes de gestión <em>v1.1</em></li></ul></details></li>
+     </ul>
+    </div></article>
+   <article class="panel"><header><h3>Radar de mejora continua</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body"><div class="donutwrap"><div id="donut"></div>
+     <ul class="lg">
+      <li><i style="background:var(--neon)"></i>Auditorías cerradas · 12</li>
+      <li><i style="background:var(--cyan)"></i>En curso · 5</li>
+      <li><i style="background:var(--amber)"></i>Pendientes · 3</li>
+      <li class="dim" style="margin-top:8px">No conformidades abiertas: 4</li>
+      <li class="dim">Acciones correctivas en plazo: 9/11</li></ul></div></div></article>
+  </section>
+
+  <!-- PILAR 2 -->
+  <section class="pillar">
+   <h2>02 · TABLAS DE VALORACIÓN DOCUMENTAL · TVD (AGN)</h2>
+   <article class="panel"><header><h3>Historia institucional · fondo acumulado</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body"><ol class="tl" id="tl"></ol><small class="dim">Hitos de ejemplo: validar con la historia institucional oficial.</small></div></article>
+   <article class="panel"><header><h3>Monitor de intervención documental</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body" id="xpBars"></div></article>
+   <article class="panel"><header><h3>Matriz TVD y disposición final</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body"><div class="tw"><table><thead><tr><th>Dependencia</th><th>Serie / asunto</th><th>A.C.</th><th>Disposición</th></tr></thead><tbody id="tvdBody"></tbody></table></div>
+    <small class="dim">A.C. = años en archivo central.</small></div></article>
+   <article class="panel"><header><h3>Convalidación externa</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body"><div class="donutwrap"><div id="gConv" style="flex:1;min-width:150px"></div>
+     <ul class="steps">
+      <li class="ok">✔ Acto administrativo</li><li class="ok">✔ Acta de Comité</li>
+      <li class="ok">✔ Radicado ante AGN / Consejo Departamental</li>
+      <li class="wait">◌ Convalidación · plazo 90 días</li></ul></div></div></article>
+  </section>
+
+  <!-- PILAR 3 -->
+  <section class="pillar">
+   <h2>03 · GESTIÓN DE RIESGOS DOCUMENTALES (NTC-ISO 31000)</h2>
+   <article class="panel"><header><h3>Mapa de calor 5×5 · probabilidad vs impacto</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body">
+     <div class="hmcap"><span>↑ IMPACTO</span><span>PROBABILIDAD →</span></div>
+     <div class="heat" id="heat"></div>
+     <div id="hmInfo" class="dim">Selecciona una celda para ver los riesgos.</div>
+    </div></article>
+   <article class="panel"><header><h3>Riesgo inherente vs residual</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body"><div class="twin" id="twin"></div></div></article>
+   <article class="panel"><header><h3>Tratamiento de riesgos</h3><button class="tgl" aria-expanded="true" aria-label="Colapsar">−</button></header>
+    <div class="body" id="treat"></div></article>
+  </section>
+ </div>
+ <p class="foot">Datos de demostración · Reemplazar los objetos TVD, RISKS y EV por datos reales.</p>
+</main>
+
+<script>
+/* ================= UTILIDADES ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MUSIC_SRC='audio/timecop1983-on-the-run.mp3'; // aporta tu archivo licenciado; si no existe se usa el synth
+
+/* ================= DATOS DE EJEMPLO ================= */
+const PERIODS={all:'Todos',p1:'1957–1993',p2:'1994–2003',p3:'2004–hoy'};
+const DEPS=['Dirección General','Secretaría General','Regional Bogotá','Regional Antioquia','Regional Valle'];
+const KPI={madurez:3.6,conf:87};
+const DISP={CT:['Conservación total','#00FF66'],E:['Eliminación','#ff3860'],S:['Selección','#00E5FF'],D:['Digitalización','#ffb020']};
+const TVD=[
+ {dep:'Dirección General',serie:'Actas de Consejo Directivo',ac:10,disp:'CT',per:'p1'},
+ {dep:'Dirección General',serie:'Resoluciones',ac:8,disp:'CT',per:'p2'},
+ {dep:'Secretaría General',serie:'Historias laborales',ac:20,disp:'CT',per:'p1'},
+ {dep:'Secretaría General',serie:'Comprobantes de pago',ac:10,disp:'E',per:'p2'},
+ {dep:'Secretaría General',serie:'Contratos de prestación de servicios',ac:15,disp:'S',per:'p3'},
+ {dep:'Regional Bogotá',serie:'Expedientes de aprendices',ac:10,disp:'D',per:'p2'},
+ {dep:'Regional Bogotá',serie:'Correspondencia recibida',ac:5,disp:'E',per:'p3'},
+ {dep:'Regional Antioquia',serie:'Informes de gestión',ac:10,disp:'S',per:'p3'},
+ {dep:'Regional Antioquia',serie:'Libros de matrícula',ac:20,disp:'CT',per:'p1'},
+ {dep:'Regional Valle',serie:'Convenios interinstitucionales',ac:15,disp:'D',per:'p2'},
+ {dep:'Regional Valle',serie:'Registros de asistencia',ac:5,disp:'E',per:'p3'}
+];
+const EV=[
+ {y:1957,t:'Creación del SENA',d:'Decreto-Ley 118 de 1957',per:'p1'},
+ {y:1994,t:'Reorganización institucional',d:'Ley 119 de 1994',per:'p2'},
+ {y:2004,t:'Nueva estructura interna',d:'Decreto 249 de 2004',per:'p3'},
+ {y:2026,t:'Elaboración TVD del fondo acumulado',d:'Comité Institucional de Gestión y Desempeño',per:'p3'}
+];
+// p=probabilidad 1-5, i=impacto 1-5, c=eficacia del control 0-1, t=estrategia de tratamiento
+const RISKS=[
+ {id:'R01',n:'Pérdida de trazabilidad de expedientes',p:4,i:5,c:.5,t:'Reducir',dep:'Secretaría General'},
+ {id:'R02',n:'Acceso no autorizado a historias laborales',p:3,i:5,c:.6,t:'Reducir',dep:'Secretaría General'},
+ {id:'R03',n:'Deterioro biológico en depósito',p:4,i:4,c:.45,t:'Modificar',dep:'Regional Antioquia'},
+ {id:'R04',n:'Obsolescencia de formatos digitales',p:3,i:4,c:.4,t:'Compartir',dep:'Dirección General'},
+ {id:'R05',n:'Eliminación sin acto administrativo',p:2,i:5,c:.7,t:'Evitar',dep:'Regional Bogotá'},
+ {id:'R06',n:'Pérdida por inundación o incendio',p:2,i:5,c:.5,t:'Compartir',dep:'Regional Valle'},
+ {id:'R07',n:'Metadatos incompletos en la captura',p:4,i:3,c:.6,t:'Reducir',dep:'Regional Bogotá'},
+ {id:'R08',n:'Foliación inconsistente en fondo acumulado',p:3,i:3,c:.5,t:'Modificar',dep:'Regional Antioquia'},
+ {id:'R09',n:'Falla de respaldo del repositorio',p:2,i:4,c:.6,t:'Reducir',dep:'Dirección General'}
+];
+const residual=r=>r.p*r.i*(1-r.c);
+
+/* ================= PARTÍCULAS (LOCK SCREEN) ================= */
+const cv=$('#fx'),cx=cv.getContext('2d');let W,H,P=[],fxOn=true;
+function fxSize(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+ P=Array.from({length:Math.min(110,Math.floor(W*H/14000))},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:-(Math.random()*.4+.1),r:Math.random()*1.8+.5}))}
+function fxDraw(){
+ cx.clearRect(0,0,W,H);cx.strokeStyle='rgba(57,169,0,.10)';cx.lineWidth=1;
+ for(let x=0;x<W;x+=60){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke()}
+ for(let y=0;y<H;y+=60){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()}
+ for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.y<0){p.y=H;p.x=Math.random()*W}if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+  cx.fillStyle='rgba(0,255,102,.8)';cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}
+ if(fxOn&&!REDUCED)requestAnimationFrame(fxDraw)}
+addEventListener('resize',()=>{if(fxOn){fxSize();fxDraw()}});
+fxSize();fxDraw();
+
+/* ================= AUDIO: archivo o synthwave generativo ================= */
+const Music={ctx:null,master:null,el:null,mode:null,muted:false,started:false,timer:null,step:0,t:0,dur:60/100/4,noise:null,
+ init(){if(this.ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  this.ctx=new AC();this.master=this.ctx.createGain();this.master.gain.value=.5;this.master.connect(this.ctx.destination)},
+ blip(f=660){this.init();if(!this.ctx)return;this.ctx.resume();const o=this.ctx.createOscillator(),g=this.ctx.createGain(),t=this.ctx.currentTime;
+  o.type='square';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*2,t+.12);
+  g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g).connect(this.master);o.start(t);o.stop(t+.2)},
+ start(){if(this.started)return;this.started=true;
+  if(MUSIC_SRC){this.el=new Audio(MUSIC_SRC);this.el.loop=true;this.el.volume=.45;
+   this.el.addEventListener('error',()=>this.synth(),{once:true});
+   this.el.play().then(()=>{this.mode='file';$('#nowTxt').textContent='Timecop1983 - On the Run'}).catch(()=>this.synth())}
+  else this.synth()},
+ synth(){if(this.mode==='synth')return;this.init();if(!this.ctx)return;this.mode='synth';this.ctx.resume();
+  $('#nowTxt').textContent='Synthwave generativo (demo)';
+  const n=this.ctx.createBuffer(1,this.ctx.sampleRate,this.ctx.sampleRate),d=n.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;this.noise=n;
+  this.t=this.ctx.currentTime+.1;this.timer=setInterval(()=>{while(this.t<this.ctx.currentTime+.3){this.sched(this.step++,this.t);this.t+=this.dur}},50)},
+ tone(f,t,len,type,vol,cut){const o=this.ctx.createOscillator(),g=this.ctx.createGain(),fl=this.ctx.createBiquadFilter();
+  o.type=type;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=cut;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0008,t+len);
+  o.connect(fl).connect(g).connect(this.master);o.start(t);o.stop(t+len+.05)},
+ sched(step,t){const CH=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],m=m=>440*Math.pow(2,(m-69)/12);
+  const bar=Math.floor(step/16)%4,s=step%16,ch=CH[bar];
+  if(s%2===0)this.tone(m(ch[0]-24),t,this.dur*1.8,'sawtooth',.22,500);
+  this.tone(m(ch[[0,1,2,1][s%4]]+12),t,this.dur*.9,'square',.05,2400);
+  if(s===0)ch.forEach(n=>this.tone(m(n),t,this.dur*15,'sawtooth',.035,900));
+  if(s%4===0){const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);
+   g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(this.master);o.start(t);o.stop(t+.25)}
+  if(s%4===2){const src=this.ctx.createBufferSource(),g=this.ctx.createGain(),f=this.ctx.createBiquadFilter();
+   src.buffer=this.noise;f.type='highpass';f.frequency.value=7000;g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);
+   src.connect(f).connect(g).connect(this.master);src.start(t);src.stop(t+.06)}},
+ setMuted(m){this.muted=m;if(this.el)this.el.muted=m;
+  if(this.master)this.master.gain.setTargetAtTime(m?0:.5,this.ctx.currentTime,.05)}
+};
+
+/* ================= VOZ ROBÓTICA (SpeechSynthesis) ================= */
+const Voice={v:null,
+ pick(){if(!window.speechSynthesis)return;const vs=speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang));
+  this.v=vs.find(v=>/(sabina|helena|paulina|m[oó]nica|laura|elvira|dalia|salome|female|mujer|google espa)/i.test(v.name))||vs[0]||null},
+ say(t){if(!window.speechSynthesis)return;this.pick();const u=new SpeechSynthesisUtterance(t);
+  u.lang='es-CO';if(this.v){u.voice=this.v;u.lang=this.v.lang}u.pitch=1.4;u.rate=.92;speechSynthesis.cancel();speechSynthesis.speak(u)}};
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>Voice.pick();
+
+/* ================= LÓGICA DE LA PANTALLA DE INICIO ================= */
+const lock=$('#lock'),iso=$('#iso'),sw=$$('.cs'),statusEl=$('#status'),granted=$('#granted');
+let charged=0,opened=false;
+function typeText(el,txt,ms=32){el.textContent='';let i=0;const id=setInterval(()=>{el.textContent+=txt[i++]||'';if(i>=txt.length)clearInterval(id)},ms)}
+sw.forEach((b,i)=>b.addEventListener('click',()=>{
+ if(b.getAttribute('aria-checked')==='true'||b.disabled)return;
+ b.setAttribute('aria-checked','true');charged++;
+ Music.blip(440+charged*220);
+ iso.style.setProperty('--charge',charged/3);
+ $('#ring').style.strokeDashoffset=565.5*(1-charged/3);
+ statusEl.textContent=`NÚCLEO ${charged}/3 ACTIVADO`;
+ if(sw[i+1]){sw[i+1].disabled=false;sw[i+1].focus()}else unlock()}));
+function unlock(){
+ statusEl.textContent='NÚCLEOS SINCRONIZADOS · VALIDANDO CREDENCIALES…';iso.classList.add('flash');
+ setTimeout(()=>{if(opened)return;typeText(granted,'ACCESO CONCEDIDO: BIENVENIDO OPERADOR DOCUMENTAL DEL SENA');
+  Voice.say('Acceso concedido. Bienvenido, Operador Documental del SENA. Iniciando sistema de gestión.')},700);
+ setTimeout(openVault,5200)}
+function openVault(){
+ if(opened)return;opened=true;
+ Music.init();$('#app').hidden=false;lock.classList.add('open');Music.start();initDashboard();
+ setTimeout(()=>{fxOn=false;lock.remove()},1700)}
+$('#skip').onclick=()=>{if(window.speechSynthesis)speechSynthesis.cancel();openVault()};
+
+/* ================= COMPONENTES SVG ================= */
+function gauge(val,max,label,color){const L=Math.PI*50,f=clamp(val/max,0,1);
+ return `<svg viewBox="0 0 120 78" class="gauge" role="img" aria-label="${label}: ${val} de ${max}">
+ <path class="gt" d="M10 62A50 50 0 0 1 110 62"/><path class="gv" style="stroke:${color};color:${color};stroke-dasharray:${L*f} ${L}" d="M10 62A50 50 0 0 1 110 62"/>
+ <text class="gn" x="60" y="54">${val}</text><text class="gl" x="60" y="73">${label}</text></svg>`}
+function donut(segs,center){const C=2*Math.PI*40,tot=segs.reduce((a,s)=>a+s.v,0);let off=0;
+ return `<svg viewBox="0 0 120 120" class="donut" role="img" aria-label="${center}"><circle class="dt" cx="60" cy="60" r="40"/>`+
+ segs.map(s=>{const len=C*s.v/tot,el=`<circle cx="60" cy="60" r="40" fill="none" stroke="${s.c}" stroke-width="14" stroke-dasharray="${Math.max(len-1.5,0)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 3px ${s.c})"/>`;off+=len;return el}).join('')+
+ `<text x="60" y="62" style="font-family:Orbitron;font-size:20px;fill:#00FF66">${tot}</text><text x="60" y="76" style="font-size:7px;fill:#7fa292">${center}</text></svg>`}
+function scoreColor(s){return s<=4?'#00FF66':s<=9?'#c6ff00':s<=14?'#ffb020':s<=19?'#ff7a1a':'#ff3860'}
+function bars(el,items){el.innerHTML=items.map(x=>`<div class="xp"><span>${x.l}</span><div class="bar"><i data-w="${x.v}"></i></div><b>${x.r??x.v+'%'}</b></div>`).join('');animateBars(el)}
+function animateBars(root){setTimeout(()=>$$('i[data-w]',root).forEach(i=>i.style.width=i.dataset.w+'%'),60)}
+
+/* ================= DASHBOARD ================= */
+function filtered(){const dep=$('#fDep').value,per=$('#fPer').value;
+ return {dep,per,rows:TVD.filter(r=>(dep==='all'||r.dep===dep)&&(per==='all'||r.per===per)),
+         risks:RISKS.filter(r=>dep==='all'||r.dep===dep)}}
+function render(){const {per,rows,risks}=filtered();
+ // Matriz TVD
+ $('#tvdBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${r.dep}</td><td>${r.serie}</td><td>${r.ac}</td><td><span class="tag" style="--c:${DISP[r.disp][1]}">${DISP[r.disp][0]}</span></td></tr>`).join('')
+  :'<tr><td colspan="4" class="dim">Sin series para este filtro.</td></tr>';
+ // Línea de tiempo
+ $('#tl').innerHTML=EV.map(e=>`<li class="${per==='all'||e.per===per?'on':''}"><b>${e.y}</b>${e.t}<small>${e.d}</small></li>`).join('');
+ // Mapa de calor
+ const g=$('#heat');let h='';
+ for(let i=5;i>=1;i--)for(let p=1;p<=5;p++){const n=risks.filter(r=>r.p===p&&r.i===i).length;
+  h+=`<button class="hc" style="--c:${scoreColor(p*i)}" data-p="${p}" data-i="${i}" aria-label="Probabilidad ${p}, impacto ${i}: ${n} riesgos">${n||''}</button>`}
+ g.innerHTML=h;
+ $$('.hc',g).forEach(b=>b.onclick=()=>{const p=+b.dataset.p,i=+b.dataset.i,hit=risks.filter(r=>r.p===p&&r.i===i);
+  $('#hmInfo').innerHTML=`<b style="color:var(--cyan)">P${p} × I${i} = ${p*i}</b><br>`+(hit.length?hit.map(r=>`<b>${r.id}</b> ${r.n} <i class="dim">(${r.dep})</i>`).join('<br>'):'Sin riesgos en esta celda.')});
+ $('#hmInfo').textContent='Selecciona una celda para ver los riesgos.';
+ // Inherente vs residual (promedio)
+ const n=risks.length||1,inh=risks.reduce((a,r)=>a+r.p*r.i,0)/n,res=risks.reduce((a,r)=>a+residual(r),0)/n;
+ $('#twin').innerHTML=`<div>${gauge(inh.toFixed(1),25,'INHERENTE','#ff7a1a')}</div><div>${gauge(res.toFixed(1),25,'RESIDUAL','#00FF66')}</div>`;
+ // Tratamiento
+ const t={Evitar:0,Reducir:0,Modificar:0,Compartir:0};risks.forEach(r=>t[r.t]++);
+ bars($('#treat'),Object.entries(t).map(([k,v])=>({l:k,v:Math.round(100*v/n),r:v})));
+ // KPIs
+ $('#kMad').textContent=KPI.madurez.toFixed(1)+' / 5';
+ $('#kConf').textContent=KPI.conf+'%';
+ $('#kRisk').textContent=risks.length?Math.round(100*risks.filter(r=>residual(r)<=9).length/risks.length)+'%':'—'}
+
+let docN=128430,feedTimer=null;
+function initDashboard(){
+ // Filtros
+ $('#fPer').innerHTML=Object.entries(PERIODS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+ $('#fDep').innerHTML='<option value="all">Todas</option>'+DEPS.map(d=>`<option>${d}</option>`).join('');
+ $('#fPer').onchange=$('#fDep').onchange=render;
+ // Widgets estáticos
+ $('#donut').innerHTML=donut([{v:12,c:'#00FF66'},{v:5,c:'#00E5FF'},{v:3,c:'#ffb020'}],'AUDITORÍAS');
+ bars($('#xpBars'),[{l:'Depuración',v:72},{l:'Foliación',v:58},{l:'Det. biológico',v:41},{l:'FUID',v:85}]);
+ $('#gConv').innerHTML=gauge(34,90,'DÍAS DE 90','#00E5FF');
+ animateBars($('#app'));
+ // Colapsables
+ $$('.tgl').forEach(b=>b.onclick=()=>{const p=b.closest('.panel'),c=p.classList.toggle('collapsed');b.textContent=c?'+':'−';b.setAttribute('aria-expanded',!c)});
+ // Mute
+ $('#mute').onclick=e=>{const m=!Music.muted;Music.setMuted(m);e.target.textContent=m?'UNMUTE':'MUTE';e.target.setAttribute('aria-pressed',m);$('#player').classList.toggle('muted',m)};
+ // Exportar
+ $('#expCsv').onclick=exportCSV;$('#expPdf').onclick=()=>window.print();
+ render();
+ // Contador y feed en vivo
+ const dc=$('#docCount'),t0=performance.now();
+ (function tick(now){const k=clamp((now-t0)/1400,0,1);dc.textContent=Math.floor(docN*k).toLocaleString('es-CO');if(k<1)requestAnimationFrame(tick)})(t0);
+ const series=TVD.map(r=>r.serie);
+ feedTimer=setInterval(()=>{docN++;dc.textContent=docN.toLocaleString('es-CO');
+  const li=document.createElement('li'),r=TVD[Math.floor(Math.random()*TVD.length)];
+  li.innerHTML=`<b>SENA-2026-${String(docN).padStart(6,'0')}</b> · ${r.serie} · ${r.dep.split(' ').pop()} · ${new Date().toLocaleTimeString('es-CO')}`;
+  const f=$('#feed');f.prepend(li);while(f.children.length>5)f.lastChild.remove()},3200);
+ const clk=()=>$('#clock').textContent='SYS '+new Date().toLocaleTimeString('es-CO');clk();setInterval(clk,1000)}
+
+/* ================= EXPORTAR CSV ================= */
+function exportCSV(){
+ const {rows,risks}=filtered(),q=v=>`"${String(v).replace(/"/g,'""')}"`;
+ const L=[['MATRIZ TVD'],['Dependencia','Serie','Años archivo central','Disposición final','Periodo']];
+ rows.forEach(r=>L.push([r.dep,r.serie,r.ac,DISP[r.disp][0],PERIODS[r.per]]));
+ L.push([],['RIESGOS DOCUMENTALES (NTC-ISO 31000)'],['ID','Riesgo','Dependencia','Probabilidad','Impacto','Inherente','Residual','Tratamiento']);
+ risks.forEach(r=>L.push([r.id,r.n,r.dep,r.p,r.i,r.p*r.i,residual(r).toFixed(1),r.t]));
+ const blob=new Blob(['\uFEFF'+L.map(l=>l.map(q).join(',')).join('\n')],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sena-gestion-documental.csv';a.click();URL.revokeObjectURL(a.href)}
+</script>
+</body>
+</html>

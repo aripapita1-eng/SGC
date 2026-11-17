@@ -1,0 +1,2791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SENA · Centro de Comando Documental Integral (ISO 30301 + TVD AGN + ISO 31000)</title>
+  <meta name="description" content="Dashboard expositivo de alta fidelidad: Informe Técnico Integrado SENA para Fondos Acumulados. Convergencia de ISO 30301, Metodología TVD (AGN Radicado 2-2015-02615) y Gestión del Riesgo NTC-ISO 31000.">
+  <link rel="icon" type="image/png" href="/assets/aistudio/image_a21268f2.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #03060c;
+      --bg-panel: rgba(8, 14, 26, 0.92);
+      --bg-card: rgba(12, 20, 36, 0.88);
+      --bg-card-hover: rgba(16, 28, 50, 0.95);
+      
+      --border-green: rgba(0, 255, 102, 0.45);
+      --border-cyan: rgba(0, 229, 255, 0.45);
+      --border-amber: rgba(255, 176, 32, 0.5);
+      --border-red: rgba(255, 56, 96, 0.5);
+      
+      --neon-green: #00FF66;
+      --sena-green: #39A900;
+      --neon-cyan: #00E5FF;
+      --neon-amber: #ffb020;
+      --neon-red: #ff3860;
+      --neon-purple: #c084fc;
+      
+      --text-main: #f3f8fc;
+      --text-dim: #cbd5e1;
+      --text-muted: #8496ae;
+      
+      --glow-green: 0 0 18px rgba(0, 255, 102, 0.35);
+      --glow-cyan: 0 0 18px rgba(0, 229, 255, 0.35);
+      --glow-amber: 0 0 18px rgba(255, 176, 32, 0.35);
+      --glow-red: 0 0 18px rgba(255, 56, 96, 0.35);
+      
+      --cut-sm: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      --cut-md: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+      --cut-lg: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 14.5px;
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        linear-gradient(rgba(0, 255, 102, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 10% 5%, rgba(0, 255, 102, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(10, 18, 32, 0.8) 0%, #03060c 100%);
+      background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+      background-attachment: fixed;
+    }
+
+    /* Fuentes y Utilidades */
+    .orb { font-family: 'Orbitron', monospace, sans-serif; letter-spacing: 0.05em; }
+    .mono { font-family: 'Share Tech Mono', monospace; }
+    
+    /* Efecto Scanline y Grilla Cibernética */
+    body::after {
+      content: " ";
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.2;
+    }
+
+    /* Barra Superior del Modo Presentación */
+    .pres-indicator {
+      display: none;
+      background: linear-gradient(90deg, rgba(0, 255, 102, 0.25), rgba(0, 229, 255, 0.25));
+      border-bottom: 2px solid var(--neon-cyan);
+      padding: 8px 24px;
+      font-size: 13px;
+      color: var(--neon-cyan);
+      text-align: center;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+    body.presentation-mode .pres-indicator { display: flex; }
+    body.presentation-mode { font-size: 16px; }
+    body.presentation-mode .pillar-conclusion { font-size: 34px !important; }
+
+    /* Header HUD */
+    header.hud-header {
+      background: rgba(6, 11, 22, 0.96);
+      border-bottom: 1px solid var(--border-green);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      backdrop-filter: blur(12px);
+    }
+    .header-top {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo-container {
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 255, 102, 0.1);
+      border: 1px solid var(--neon-green);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      clip-path: var(--cut-sm);
+      box-shadow: var(--glow-green);
+    }
+    .brand-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px var(--neon-green));
+    }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      font-weight: 700;
+      clip-path: var(--cut-sm);
+    }
+    .brand-normative {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .brand-normative b { color: var(--neon-cyan); }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-box-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input {
+      background: rgba(10, 18, 34, 0.9);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      padding: 7px 12px 7px 32px;
+      width: 220px;
+      clip-path: var(--cut-sm);
+      transition: all 0.25s ease;
+    }
+    .search-input:focus {
+      outline: none;
+      width: 280px;
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      font-size: 13px;
+      color: var(--neon-cyan);
+      pointer-events: none;
+    }
+
+    /* Botones Cyber HUD */
+    .cbtn {
+      background: rgba(10, 18, 34, 0.85);
+      border: 1px solid rgba(0, 255, 102, 0.35);
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      clip-path: var(--cut-sm);
+      user-select: none;
+    }
+    .cbtn:hover {
+      background: rgba(0, 255, 102, 0.15);
+      border-color: var(--neon-green);
+      box-shadow: var(--glow-green);
+      transform: translateY(-1px);
+    }
+    .cbtn.active {
+      background: var(--neon-green);
+      color: #031408;
+      font-weight: 800;
+      box-shadow: var(--glow-green);
+      border-color: #ffffff;
+    }
+    .cbtn.cyan {
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--neon-cyan);
+    }
+    .cbtn.cyan:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+    .cbtn.cyan.active {
+      background: var(--neon-cyan);
+      color: #02121a;
+      box-shadow: var(--glow-cyan);
+      border-color: #ffffff;
+    }
+    .cbtn.amber {
+      border-color: rgba(255, 176, 32, 0.4);
+      color: var(--neon-amber);
+    }
+    .cbtn.amber:hover {
+      background: rgba(255, 176, 32, 0.15);
+      border-color: var(--neon-amber);
+      box-shadow: var(--glow-amber);
+    }
+    .cbtn.amber.active {
+      background: var(--neon-amber);
+      color: #1a0f02;
+      box-shadow: var(--glow-amber);
+    }
+
+    /* Franja Telemetría Master (KPI Bar) */
+    .telemetry-ribbon {
+      background: rgba(4, 8, 16, 0.95);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+      padding: 10px 24px;
+    }
+    .telemetry-grid {
+      max-width: 1560px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+    .telem-chip {
+      background: rgba(12, 20, 36, 0.7);
+      border-left: 3px solid var(--neon-green);
+      padding: 8px 12px;
+      clip-path: var(--cut-sm);
+      position: relative;
+      transition: all 0.2s ease;
+      cursor: default;
+    }
+    .telem-chip:hover {
+      background: rgba(18, 30, 54, 0.9);
+      transform: translateY(-1px);
+    }
+    .telem-chip.cyan { border-left-color: var(--neon-cyan); }
+    .telem-chip.red { border-left-color: var(--neon-red); }
+    .telem-chip.amber { border-left-color: var(--neon-amber); }
+    .telem-chip.purple { border-left-color: var(--neon-purple); }
+
+    .telem-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .telem-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .telem-val span.sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .telem-desc {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    /* Barra de Navegación por Módulos */
+    nav.nav-bar {
+      max-width: 1560px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-dim);
+      background: rgba(10, 16, 30, 0.7);
+    }
+    .nav-tab:hover {
+      color: #fff;
+      border-color: var(--neon-cyan);
+    }
+    .nav-tab.active {
+      background: linear-gradient(180deg, rgba(0, 229, 255, 0.25), rgba(0, 229, 255, 0.05));
+      border: 1px solid var(--neon-cyan);
+      color: #ffffff;
+      box-shadow: var(--glow-cyan);
+    }
+    .nav-tab.active::before {
+      content: "▶ ";
+      color: var(--neon-green);
+    }
+
+    /* Área Principal de Contenido */
+    main.content-area {
+      max-width: 1560px;
+      margin: 18px auto 40px;
+      padding: 0 24px;
+      flex: 1;
+      width: 100%;
+    }
+
+    section.view-section {
+      display: none;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    section.view-section.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Encabezados de Sección */
+    .pillar-headline {
+      margin-bottom: 22px;
+      padding: 16px 20px;
+      background: rgba(10, 18, 34, 0.6);
+      border-left: 5px solid var(--neon-green);
+      clip-path: var(--cut-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .pillar-headline.cyan { border-color: var(--neon-cyan); }
+    .pillar-headline.amber { border-color: var(--neon-amber); }
+    .pillar-headline.red { border-color: var(--neon-red); }
+    .pillar-headline.purple { border-color: var(--neon-purple); }
+
+    .pillar-question {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      letter-spacing: 0.08em;
+    }
+    .pillar-conclusion {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-top: 4px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+    .pillar-tech-name {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .section-pager-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Sub-tabs internas para organizar módulos densos */
+    .subtabs-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      border-bottom: 1px dashed rgba(0, 229, 255, 0.3);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      background: rgba(12, 22, 40, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      padding: 6px 14px;
+      cursor: pointer;
+      clip-path: var(--cut-sm);
+      transition: all 0.2s ease;
+    }
+    .subtab-btn:hover {
+      color: #fff;
+      border-color: var(--neon-cyan);
+    }
+    .subtab-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+    }
+
+    .subpane { display: none; }
+    .subpane.active { display: block; animation: fadeIn 0.25s ease forwards; }
+
+    /* Grillas y Tarjetas Cyber */
+    .grid-12 {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .col-12 { grid-column: span 12; }
+    .col-8 { grid-column: span 8; }
+    .col-7 { grid-column: span 7; }
+    .col-6 { grid-column: span 6; }
+    .col-5 { grid-column: span 5; }
+    .col-4 { grid-column: span 4; }
+    .col-3 { grid-column: span 3; }
+
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      padding: 20px;
+      clip-path: var(--cut-md);
+      position: relative;
+      backdrop-filter: blur(8px);
+      transition: all 0.25s ease;
+    }
+    .cyber-card:hover {
+      border-color: var(--neon-green);
+      box-shadow: var(--glow-green);
+    }
+    .cyber-card.cyan-card {
+      border-color: rgba(0, 229, 255, 0.35);
+    }
+    .cyber-card.cyan-card:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+    .cyber-card.amber-card {
+      border-color: rgba(255, 176, 32, 0.35);
+    }
+    .cyber-card.amber-card:hover {
+      border-color: var(--neon-amber);
+      box-shadow: var(--glow-amber);
+    }
+    .cyber-card.red-card {
+      border-color: rgba(255, 56, 96, 0.35);
+    }
+    .cyber-card.red-card:hover {
+      border-color: var(--neon-red);
+      box-shadow: var(--glow-red);
+    }
+    .cyber-card.purple-card {
+      border-color: rgba(192, 132, 252, 0.35);
+    }
+    .cyber-card.purple-card:hover {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 18px rgba(192, 132, 252, 0.35);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+    .card-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      clip-path: var(--cut-sm);
+    }
+
+    /* Tablas Tácticas HUD */
+    .tactical-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin: 12px 0;
+    }
+    .tactical-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--neon-cyan);
+      border-bottom: 2px solid var(--neon-cyan);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tactical-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-dim);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .tactical-table tr:hover td {
+      background: rgba(0, 255, 102, 0.05);
+      color: #fff;
+    }
+    .tactical-table tr:nth-child(even) td {
+      background: rgba(0, 0, 0, 0.22);
+    }
+
+    /* Notas del Expositor (Speaker Notes) */
+    .speaker-note-box {
+      background: rgba(0, 229, 255, 0.08);
+      border-left: 4px solid var(--neon-cyan);
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: #fff;
+      clip-path: var(--cut-sm);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .speaker-icon {
+      font-size: 18px;
+      color: var(--neon-cyan);
+      line-height: 1;
+    }
+
+    /* Bloques de Dossier y Expanders */
+    .dossier-acc {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 16, 30, 0.6);
+      margin-bottom: 10px;
+      clip-path: var(--cut-sm);
+      transition: all 0.2s ease;
+    }
+    .dossier-acc[open] {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
+      background: rgba(12, 22, 42, 0.85);
+    }
+    .dossier-acc>summary {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: #fff;
+      user-select: none;
+      list-style: none;
+    }
+    .dossier-acc>summary::-webkit-details-marker { display: none; }
+    .dossier-acc>summary::before {
+      content: "▸";
+      color: var(--neon-cyan);
+      font-size: 14px;
+      margin-right: 8px;
+      transition: transform 0.2s;
+    }
+    .dossier-acc[open]>summary::before {
+      transform: rotate(90deg);
+      color: var(--neon-green);
+    }
+    .dossier-content {
+      padding: 14px 18px 18px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Listas con viñetas futuristas */
+    .cyber-list {
+      list-style: none;
+      margin: 8px 0;
+    }
+    .cyber-list li {
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+      position: relative;
+      padding-left: 20px;
+    }
+    .cyber-list li::before {
+      content: "▫";
+      position: absolute;
+      left: 0;
+      color: var(--neon-cyan);
+      font-size: 14px;
+    }
+    .cyber-list li b { color: #fff; }
+
+    /* Fases Timeline Visual */
+    .timeline-phases {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .phase-step {
+      background: rgba(12, 22, 40, 0.8);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      padding: 14px 12px;
+      clip-path: var(--cut-sm);
+      position: relative;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .phase-step:hover, .phase-step.active {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 102, 0.1);
+      box-shadow: var(--glow-green);
+      transform: translateY(-2px);
+    }
+    .phase-num {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--neon-cyan);
+    }
+    .phase-step.active .phase-num { color: var(--neon-green); }
+    .phase-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+    .phase-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Matriz de Riesgo 5x5 Interactiva */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(5, 1fr);
+      gap: 4px;
+      margin: 14px 0;
+    }
+    .m-header {
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--neon-cyan);
+      padding: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .m-row-lbl {
+      background: rgba(12, 20, 36, 0.8);
+      color: var(--text-dim);
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+    }
+    .m-cell {
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .m-cell:hover {
+      transform: scale(1.08);
+      z-index: 10;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+    .m-low { background: rgba(0, 255, 102, 0.2); color: var(--neon-green); border-color: rgba(0, 255, 102, 0.4); }
+    .m-med { background: rgba(255, 176, 32, 0.25); color: var(--neon-amber); border-color: rgba(255, 176, 32, 0.5); }
+    .m-high { background: rgba(255, 56, 96, 0.35); color: var(--neon-red); border-color: rgba(255, 56, 96, 0.6); }
+
+    /* Footer Normativo Institucional */
+    footer.normative-footer {
+      border-top: 1px solid var(--border-green);
+      padding: 20px 24px;
+      background: rgba(4, 7, 14, 0.98);
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+    .normative-footer p { max-width: 1200px; margin: 0 auto; line-height: 1.6; }
+
+    /* Reproductor de Video Cyber HUD y Telemetría Audiovisual */
+    .video-hud-wrapper {
+      background: radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+      border: 1px solid rgba(0, 229, 255, 0.45);
+      box-shadow: 0 0 35px rgba(0, 229, 255, 0.18), inset 0 0 20px rgba(0, 229, 255, 0.05);
+      clip-path: var(--cut-lg);
+      padding: 22px;
+      position: relative;
+    }
+    .video-screen-frame {
+      position: relative;
+      border: 1px solid rgba(0, 229, 255, 0.6);
+      background: #000;
+      clip-path: var(--cut-md);
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0, 229, 255, 0.25);
+    }
+    .video-feed-overlay {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+      font-size: 11px;
+    }
+    .video-hud-badge {
+      background: rgba(4, 8, 16, 0.85);
+      border: 1px solid rgba(0, 255, 102, 0.5);
+      color: var(--neon-green);
+      padding: 3px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .video-hud-badge.rec {
+      border-color: rgba(255, 56, 96, 0.6);
+      color: var(--neon-red);
+    }
+    .rec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--neon-red);
+      animation: pulseDot 1.2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.75); }
+    }
+    .video-element {
+      width: 100%;
+      max-height: 560px;
+      display: block;
+      background: #000;
+      outline: none;
+    }
+    .custom-video-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(10, 18, 32, 0.95);
+      border-top: 1px solid rgba(0, 229, 255, 0.3);
+      flex-wrap: wrap;
+    }
+    .vid-progress-container {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      position: relative;
+      cursor: pointer;
+      border-radius: 2px;
+      overflow: hidden;
+      min-width: 160px;
+    }
+    .vid-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+      box-shadow: 0 0 10px var(--neon-cyan);
+      transition: width 0.1s linear;
+    }
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .chapter-card {
+      background: rgba(12, 22, 40, 0.75);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      padding: 12px 14px;
+      clip-path: var(--cut-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chapter-card:hover {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 229, 255, 0.12);
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+    .chapter-time {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon-green);
+      margin-bottom: 2px;
+    }
+    .chapter-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .chapter-desc {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Estilos de Impresión para Dossier Físico */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      header, .telemetry-ribbon, nav.nav-bar, .section-pager-btns, .speaker-note-box, footer { display: none !important; }
+      .view-section { display: block !important; margin-bottom: 40px !important; page-break-after: always; }
+      .cyber-card { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; color: #000 !important; }
+      .tactical-table th { background: #eee !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
+      .tactical-table td { color: #000 !important; border-bottom: 1px solid #ccc !important; }
+      .pillar-conclusion { color: #000 !important; text-shadow: none !important; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .telemetry-grid { grid-template-columns: repeat(3, 1fr); }
+      .timeline-phases { grid-template-columns: repeat(3, 1fr); }
+      .grid-12 { display: flex; flex-direction: column; }
+    }
+    @media (max-width: 768px) {
+      .telemetry-grid { grid-template-columns: repeat(2, 1fr); }
+      .timeline-phases { grid-template-columns: 1fr; }
+      .header-top { flex-direction: column; align-items: flex-start; }
+      .search-input { width: 100%; }
+      .matrix-grid { overflow-x: auto; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de progreso del Modo Exposición (Visible con F o botón) -->
+  <div class="pres-indicator mono" id="presBanner">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--neon-green); box-shadow: var(--glow-green);"></span>
+      <b style="color: #fff;">MODO EXPOSICIÓN ACTIVO</b> · CONTROLES: TECLADO FLECHAS [← / →]
+    </div>
+    <div id="presProgress" class="orb" style="color: #fff; font-weight: 800; font-size: 14px;">SECCIÓN 1 / 5 · RESUMEN & CONVERGENCIA</div>
+    <div style="display: flex; gap: 8px;">
+      <button class="cbtn cyan" onclick="prevSlide()" style="padding: 3px 10px;">◀ ANTERIOR</button>
+      <button class="cbtn cyan" onclick="nextSlide()" style="padding: 3px 10px;">SIGUIENTE ▶</button>
+      <button class="cbtn" onclick="togglePresentationMode()" style="padding: 3px 10px;">✕ SALIR [ESC]</button>
+    </div>
+  </div>
+
+  <!-- Encabezado HUD Futurista -->
+  <header class="hud-header">
+    <div class="header-top">
+      <div class="brand-block">
+        <div class="brand-logo-container">
+          <img src="/assets/aistudio/image_a21268f2.png" alt="SENA" class="brand-logo">
+        </div>
+        <div>
+          <div class="brand-title orb">
+            <span>SENA · GESTIÓN DOCUMENTAL INTEGRADA</span>
+            <span class="brand-badge mono">INFORME TÉCNICO VINCULANTE</span>
+          </div>
+          <div class="brand-normative mono">
+            MARCO TRI-NORMATIVO: <b>ISO 30301 (SGD)</b> + <b>METODOLOGÍA TVD (AGN RAD. 2-2015-02615)</b> + <b>NTC-ISO 31000 (RIESGO)</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="search-box-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="hudSearch" class="search-input" placeholder="Buscar cláusula, norma o paso..." oninput="handleSearch(this.value)">
+        </div>
+
+        <button type="button" class="cbtn" id="btnSoundToggle" onclick="toggleSound()" title="Alternar audio sintético Web Audio">
+          <span id="soundIcon">🔊 AUDIO ON</span>
+        </button>
+
+        <button type="button" class="cbtn cyan" onclick="window.print()" title="Imprimir dossier completo">
+          <span>⎙ EXPORTAR DOSSIER</span>
+        </button>
+
+        <button type="button" class="cbtn active" id="btnPresentation" onclick="togglePresentationMode()" title="Modo proyector pantalla completa">
+          <span>▶ MODO EXPOSICIÓN (F)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Franja Telemetría Master (KPI Bar) -->
+    <div class="telemetry-ribbon">
+      <div class="telemetry-grid mono">
+        <div class="telem-chip" title="Volumen físico total del pasivo archivístico intervenido">
+          <div class="telem-label">Volumen Pasivo <span>[CENSO]</span></div>
+          <div class="telem-val"><span class="count-num" data-target="1500">1.500</span> <span class="sub">m.l.</span></div>
+          <div class="telem-desc">Fondo acumulado 1991–2010</div>
+        </div>
+
+        <div class="telem-chip cyan" title="Plazo perentorio de ley para convalidación oficial ante el AGN">
+          <div class="telem-label">Plazo Legal AGN <span>[ACDO 004]</span></div>
+          <div class="telem-val" style="color: var(--neon-cyan);"><span class="count-num" data-target="90">90</span> <span class="sub">días</span></div>
+          <div class="telem-desc">Artículo 11 improrrogable</div>
+        </div>
+
+        <div class="telem-chip red" title="Porcentaje del acervo con ataque de hongos e insectos bibliófagos">
+          <div class="telem-label">Afección Biológica <span>[CRÍTICO]</span></div>
+          <div class="telem-val" style="color: var(--neon-red);"><span class="count-num" data-target="15">15</span> <span class="sub">%</span></div>
+          <div class="telem-desc">Aislamiento + Hoja Testigo</div>
+        </div>
+
+        <div class="telem-chip amber" title="Evoluciones orgánicas documentadas en la investigación histórica">
+          <div class="telem-label">Periodos Orgánicos <span>[ESTRUCTURA]</span></div>
+          <div class="telem-val" style="color: var(--neon-amber);"><span class="count-num" data-target="3">3</span> <span class="sub">Etapas</span></div>
+          <div class="telem-desc">1991-95 | 1995-00 | 2000-10</div>
+        </div>
+
+        <div class="telem-chip purple" title="Inventarios obligatorios independientes según el Principio de Procedencia">
+          <div class="telem-label">Inventarios FUID <span>[AGN]</span></div>
+          <div class="telem-val" style="color: var(--neon-purple);"><span class="count-num" data-target="3">3</span> <span class="sub">FUIDs</span></div>
+          <div class="telem-desc">Separación estricta por periodo</div>
+        </div>
+
+        <div class="telem-chip" style="border-left-color: #fff;" title="Convergencia metodológica de estándares aplicados">
+          <div class="telem-label">Estándares <span>[SISTEMA]</span></div>
+          <div class="telem-val" style="color: #fff;"><span class="count-num" data-target="3">3</span> <span class="sub">Normas</span></div>
+          <div class="telem-desc">ISO 30301 + AGN + ISO 31000</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra Principal de Módulos (Exposición) -->
+  <nav class="nav-bar mono">
+    <button class="cbtn nav-tab active" data-view="mod0" onclick="navigateTo('mod0')">
+      <span>00. RESUMEN & CONVERGENCIA</span>
+    </button>
+    <button class="cbtn nav-tab" data-view="mod1" onclick="navigateTo('mod1')">
+      <span>01. SGD ISO 30301</span>
+    </button>
+    <button class="cbtn nav-tab" data-view="mod2" onclick="navigateTo('mod2')">
+      <span>02. TVD METODOLOGÍA AGN</span>
+    </button>
+    <button class="cbtn nav-tab" data-view="mod3" onclick="navigateTo('mod3')">
+      <span>03. GESTIÓN RIESGO ISO 31000</span>
+    </button>
+    <button class="cbtn nav-tab" data-view="mod4" onclick="navigateTo('mod4')">
+      <span>04. CASO PRÁCTICO (1.500 M.L.)</span>
+    </button>
+    <button class="cbtn nav-tab" data-view="mod5" onclick="navigateTo('mod5')" style="border-color: rgba(0, 229, 255, 0.6); box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);">
+      <span style="color: var(--neon-cyan);">🎬 05. VIDEO: EL PLAN DE INTEGRACIÓN</span>
+    </button>
+  </nav>
+
+  <!-- Contenedor Principal de Secciones -->
+  <main class="content-area">
+
+    <!-- ========================================================
+         MÓDULO 00: RESUMEN EJECUTIVO Y CONVERGENCIA SISTÉMICA
+         ======================================================== -->
+    <section id="view-mod0" class="view-section active">
+      <div class="pillar-headline">
+        <div>
+          <div class="pillar-question mono">MÓDULO 00 · PANORÁMICA EJECUTIVA Y ARTICULACIÓN ESTRATÉGICA</div>
+          <h2 class="pillar-conclusion orb">Convergencia Sistémica de los Tres Estándares</h2>
+          <p class="pillar-tech-name">Integración sinérgica de la ISO 30301, el Lineamiento AGN Radicado 2-2015-02615 y la NTC-ISO 31000:2018 para la intervención definitiva de fondos acumulados.</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn cyan" onclick="navigateTo('mod1')">IR A CAPÍTULO 1 (ISO 30301) ▶</button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula Principal -->
+      <div class="grid-12">
+        <!-- Tarjeta de Diagnóstico Estratégico -->
+        <div class="col-6 cyber-card">
+          <div class="card-title orb">
+            <span>🛡️ Síntesis Ejecutiva del Informe Técnico</span>
+            <span class="card-tag mono">OBJETIVO ESTRATÉGICO</span>
+          </div>
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            El presente informe resuelve la problemática histórica del pasivo documental en entidades del Estado mediante una fórmula técnica robusta: <b>ninguna norma actúa de forma aislada</b>. La gestión documental contemporánea exige articular la gobernanza de calidad, la técnica archivística legal y el control preventivo de riesgos.
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>SGD ISO 30301:</b> Proporciona la estructura directiva de alto nivel, la política institucional, los recursos y la auditoría sistemática (Capítulos 4 al 10 y Anexo A).</li>
+            <li><b>Lineamiento TVD (AGN):</b> Fija las 5 fases archivísticas perentorias, la confección del FUID y el procedimiento vinculante de convalidación oficial ante el AGN.</li>
+            <li><b>NTC-ISO 31000:2018:</b> Garantiza la identificación de amenazas (biológicas, legales y operativas), asignando Dueños del Riesgo (<i>Risk Owners</i>) y planes de tratamiento.</li>
+          </ul>
+
+          <div class="speaker-note-box mono">
+            <span class="speaker-icon">💡</span>
+            <div>
+              <b>Nota clave para el expositor:</b> Destaque a la audiencia que el diagnóstico archivístico exigido por el AGN es exactamente la evaluación de contexto de la ISO 30301 (Cláusula 4.1), y las debilidades halladas son los riesgos obligatorios a tratar según la ISO 31000 (Cláusula 6).
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Justificación Legal y Técnica -->
+        <div class="col-6 cyber-card cyan-card">
+          <div class="card-title orb" style="color: var(--neon-cyan);">
+            <span>⚖️ Marco Legal Vinculante en Colombia</span>
+            <span class="card-tag mono" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">VIGENCIA 2026</span>
+          </div>
+          <p style="color: var(--text-dim); margin-bottom: 10px;">
+            La intervención de fondos acumulados no es optativa; constituye un mandato legal de orden público sujeto a vigilancia y sanciones disciplinarias de los órganos de control:
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;" class="mono">
+            <div style="background: rgba(0, 229, 255, 0.08); padding: 10px; border-left: 2px solid var(--neon-cyan);">
+              <b style="color: #fff;">Ley 594 de 2000</b>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Ley General de Archivos. Obliga al rescate, organización y custodia de los fondos públicos.</div>
+            </div>
+            <div style="background: rgba(0, 229, 255, 0.08); padding: 10px; border-left: 2px solid var(--neon-cyan);">
+              <b style="color: #fff;">Acuerdo 004 de 2013</b>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Reglamenta el trámite y convalidación de TVD ante el AGN con plazo fatal de 90 días.</div>
+            </div>
+            <div style="background: rgba(0, 229, 255, 0.08); padding: 10px; border-left: 2px solid var(--neon-cyan);">
+              <b style="color: #fff;">Ley 1712 de 2014</b>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Transparencia y Acceso a la Información Pública. Sanciona la opacidad y pérdida documental.</div>
+            </div>
+            <div style="background: rgba(0, 229, 255, 0.08); padding: 10px; border-left: 2px solid var(--neon-cyan);">
+              <b style="color: #fff;">Radicado AGN 2-2015-02615</b>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Doctrina técnica vinculante del AGN que prohíbe mezclar periodos en un único FUID.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Matriz de Convergencia Institucional Completa (Capítulo 4.1 del Informe) -->
+        <div class="col-12 cyber-card cyan-card">
+          <div class="card-title orb" style="color: var(--neon-cyan);">
+            <span>🌐 Matriz de Convergencia Institucional Completa (Las 5 Fases Sincronizadas)</span>
+            <span class="card-tag mono">CAPÍTULO 4.1 DEL INFORME</span>
+          </div>
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Esta matriz detalla la correlación exacta entre los requisitos de gestión documental (ISO 30301), la metodología archivística oficial de intervención de fondos acumulados (AGN) y la arquitectura de gestión del riesgo (NTC-ISO 31000:2018):
+          </p>
+
+          <div style="overflow-x: auto;">
+            <table class="tactical-table mono">
+              <thead>
+                <tr>
+                  <th style="width: 18%;">Fase del Proceso</th>
+                  <th style="width: 27%;">ISO 30301 (MSR / SGD)</th>
+                  <th style="width: 27%;">Metodología AGN (TVD - Rad. 2-2015-02615)</th>
+                  <th style="width: 28%;">NTC-ISO 31000:2018 (Gestión del Riesgo)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 800; color: #fff;">
+                    1. Diagnóstico y Contexto Institucional
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-green);">Cláusulas 4.1, 4.2 y 4.3:</b> Comprensión del contexto interno/externo, requisitos de negocio, partes interesadas y alcance institucional del SGD.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-cyan);">Pasos 1 y 2 (Metodología AGN):</b> Compilación e investigación histórica-institucional, organigramas y diagnóstico físico/archivístico integral.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-amber);">Cláusulas 5.4.1 y 6.3:</b> Determinación del alcance, contexto de la organización, factores externos, internos y definición de criterios de riesgo.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 800; color: #fff;">
+                    2. Planificación Operativa (PAI)
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-green);">Cláusulas 6.1, 6.2 y 7.1 a 7.5:</b> Acciones para tratar riesgos y oportunidades, objetivos del SGD, recursos, competencias y asignación presupuestal.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-cyan);">Paso 3 (Metodología AGN):</b> Formulación del Plan de Archivo Institucional (PAI) específico de intervención, cronograma y equipos de bioseguridad.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-amber);">Cláusula 6.5.3:</b> Preparación e implementación de los planes de tratamiento de riesgos (asignación de recursos y responsables directos).
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 800; color: #fff;">
+                    3. Ejecución Archivística y Registro
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-green);">Capítulo 8 y Anexo A:</b> Planificación y control operacional, procesos de creación de documentos (A.1-A.3) y procesos de control (B.1-B.5).
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-cyan);">Paso 4 (Metodología AGN):</b> Limpieza, desinfección biológica, hoja testigo, depuración, clasificación, ordenación, foliación y elaboración del FUID.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-amber);">Cláusulas 6.4.2 y 6.4.3:</b> Identificación y análisis de riesgos operativos durante la manipulación física (riesgo biológico, deterioro físico).
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 800; color: #fff;">
+                    4. Valoración Secundaria y Propuesta TVD
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-green);">Cláusula 8.2 y Anexo A (B.5):</b> Determinación de disposición final autorizada: conservación permanente, eliminación reglada o transferencia secundaria.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-cyan);">Paso 5 (Metodología AGN):</b> Valoración documental de valores primarios y secundarios, formulación formal de la propuesta técnica de TVD.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-amber);">Cláusula 6.4.4:</b> Valoración del riesgo residual ante pérdida involuntaria de patrimonio documental o eliminación indebida de expedientes.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 800; color: #fff;">
+                    5. Gobernanza, Aprobación y Cierre
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-green);">Capítulos 5, 9 y 10:</b> Liderazgo directivo, auditoría interna, revisión por la dirección y acciones de mejora continua (ciclo PHVA).
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-cyan);">Acuerdo 004/2013 (Arts. 8 y 11):</b> Aprobación interna en Comité de Archivo (Acta/Resolución) y radicación AGN con convalidación en 90 días.
+                  </td>
+                  <td>
+                    <b style="color: var(--neon-amber);">Cláusulas 6.6 y 6.7:</b> Seguimiento, revisión continua, monitoreo de la eficacia de controles, registro de evidencias e informes de trazabilidad.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         MÓDULO 01: MARCO NORMATIVO ISO 30301 (MSR / SGD)
+         ======================================================== -->
+    <section id="view-mod1" class="view-section">
+      <div class="pillar-headline">
+        <div>
+          <div class="pillar-question mono">MÓDULO 01 · GOBERNANZA DOCUMENTAL Y SISTEMAS DE GESTIÓN</div>
+          <h2 class="pillar-conclusion orb">Norma Técnica NTC-ISO 30301:2019</h2>
+          <p class="pillar-tech-name">Sistemas de Gestión para Documentos (SGD / MSR). Estructura de Alto Nivel (HLS), requisitos de las Cláusulas 4 a la 10 y Anexo A normativo.</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn" onclick="navigateTo('mod0')">◀ ANTERIOR</button>
+          <button class="cbtn cyan" onclick="navigateTo('mod2')">SIGUIENTE (TVD AGN) ▶</button>
+        </div>
+      </div>
+
+      <!-- Sub-navegador de cláusulas ISO 30301 -->
+      <div class="subtabs-bar">
+        <button class="subtab-btn active" onclick="switchSubtab('mod1', 'sub-iso-ctx', this)">CLÁUSULA 4: CONTEXTO & REQUISITOS</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod1', 'sub-iso-lead', this)">CAPÍTULOS 5 Y 6: LIDERAZGO & PLANIFICACIÓN</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod1', 'sub-iso-ops', this)">CAPÍTULOS 7 Y 8: SOPORTE & OPERACIÓN</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod1', 'sub-iso-eval', this)">CAPÍTULOS 9 Y 10: EVALUACIÓN & MEJORA</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod1', 'sub-iso-anexo', this)">ANEXO A (NORMATIVO): CREACIÓN & CONTROL</button>
+      </div>
+
+      <!-- SUBPANE 1: CONTEXTO (CLÁUSULA 4) -->
+      <div id="sub-iso-ctx" class="subpane active">
+        <div class="grid-12">
+          <div class="col-5 cyber-card">
+            <div class="card-title orb">
+              <span>🏛️ Fundamentos de la Cláusula 4</span>
+              <span class="card-tag mono">CONTEXTO ORGANIZACIONAL</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              La ISO 30301 establece que ningún sistema de gestión documental puede implementarse sin un diagnóstico exhaustivo del entorno institucional.
+            </p>
+            <div class="dossier-acc" open>
+              <summary>4.1 Comprensión de la Organización y su Contexto</summary>
+              <div class="dossier-content">
+                Identificación de factores externos (políticos, normativos, tecnológicos) e internos (cultura organizacional, sistemas heredados, cambios estructurales, fusiones y liquidaciones previas).
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>4.2 Requisitos del Negocio y Partes Interesadas</summary>
+              <div class="dossier-content">
+                Determinación sistemática de las expectativas de entes reguladores (AGN, Procuraduría, Contraloría), ciudadanos y usuarios internos que requieren acceso fidedigno a la información.
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>4.3 Determinación del Alcance del SGD</summary>
+              <div class="dossier-content">
+                Delimitación precisa de los límites físicos y lógicos del sistema, abarcando tanto la documentación de gestión activa como el pasivo histórico de los fondos acumulados.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-7 cyber-card cyan-card">
+            <div class="card-title orb" style="color: var(--neon-cyan);">
+              <span>📋 Tabla de Requisitos Institucionales y Propósito Documental</span>
+              <span class="card-tag mono">ISO 30301 CL. 4.2</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 10px;">
+              Tipología de requisitos identificados que el Sistema de Gestión para Documentos (SGD) debe satisfacer obligatoriamente:
+            </p>
+            <table class="tactical-table mono">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Tipo de Requisito</th>
+                  <th style="width: 45%;">Descripción en el Escenario Institucional</th>
+                  <th style="width: 30%;">Propósito Documental</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b style="color: var(--neon-green);">Requisitos Legales</b></td>
+                  <td>Cumplimiento de la Ley 594/2000, Decreto 2578/2012 y Acuerdos expedidos por el Archivo General de la Nación.</td>
+                  <td>Validez probatoria, autenticidad e integridad ante litigios y auditorías.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-cyan);">Requisitos Operativos</b></td>
+                  <td>Necesidad de localizar expedientes y antecedentes para resolver trámites ciudadanos y formación técnica.</td>
+                  <td>Disponibilidad inmediata, trazabilidad y continuidad del servicio institucional.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-amber);">Requisitos Estratégicos</b></td>
+                  <td>Preservación de la memoria histórica del SENA, sus aportes a la formación profesional y el patrimonio social.</td>
+                  <td>Identidad institucional, valor cultural y transferencia secundaria al AGN.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-red);">Requisitos de Gestión de Riesgo</b></td>
+                  <td>Mitigación de la pérdida de información por deterioro biológico, físico o descarte arbitrario no autorizado.</td>
+                  <td>Salvaguarda de activos de información y control disciplinario/fiscal.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 2: LIDERAZGO & PLANIFICACIÓN (CAPÍTULOS 5 Y 6) -->
+      <div id="sub-iso-lead" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>👔 Capítulo 5: Liderazgo y Compromiso Directivo</span>
+              <span class="card-tag mono">GOBERNANZA</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              El éxito de la gestión documental depende del patrocinio activo de la Alta Dirección. La norma prohíbe delegar la responsabilidad última:
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>5.1 Compromiso de la Alta Dirección:</b> Asegurar que la política y objetivos del SGD sean compatibles con la misión institucional y que se asignen los recursos financieros y humanos.</li>
+              <li><b>5.2 Política para Documentos:</b> Documento formal aprobado que establece los compromisos de creación, captura, gestión y conservación de evidencia institucional auténtica.</li>
+              <li><b>5.3 Roles, Responsabilidades y Autoridades:</b> Designación explícita del Comité Interno de Archivo, líderes de proceso, custodios de fondo y administradores del software del SGD.</li>
+            </ul>
+          </div>
+
+          <div class="col-6 cyber-card amber-card">
+            <div class="card-title orb" style="color: var(--neon-amber);">
+              <span>🎯 Capítulo 6: Planificación y Gestión de Riesgos</span>
+              <span class="card-tag mono" style="border-color: var(--neon-amber); color: var(--neon-amber);">PLANIFICACIÓN</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              Articulación directa con la NTC-ISO 31000 para prevenir que los riesgos afecten el cumplimiento de los objetivos institucionales:
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>6.1 Acciones para tratar Riesgos y Oportunidades:</b> Evaluación proactiva de amenazas que impidan que los documentos sean fidedignos, íntegros y utilizables a lo largo del tiempo.</li>
+              <li><b>6.2 Objetivos del SGD y Planificación para Lograrlos:</b> Metas medibles (ej. sanear 1.500 m.l. de fondo acumulado en 12 meses, radicar TVD convalidada en 90 días, digitalizar 100% de expedientes con valor permanente).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 3: SOPORTE & OPERACIÓN (CAPÍTULOS 7 Y 8) -->
+      <div id="sub-iso-ops" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card cyan-card">
+            <div class="card-title orb" style="color: var(--neon-cyan);">
+              <span>⚙️ Capítulo 7: Soporte y Recursos Institucionales</span>
+              <span class="card-tag mono">APOYO OPERATIVO</span>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>7.1 Recursos:</b> Infraestructura física adecuada (depósitos con control termo-higrométrico), dotación de bioseguridad (EPP) y plataformas tecnológicas seguras.</li>
+              <li><b>7.2 Competencia:</b> Capacitación obligatoria al personal archivístico en normatividad AGN, paleografía, conservación y tablas de retención/valoración.</li>
+              <li><b>7.3 Concienciación:</b> Sensibilización a todos los funcionarios sobre las consecuencias penales y disciplinarias de la alteración o pérdida de documentos.</li>
+              <li><b>7.4 Comunicación:</b> Canales internos y externos para divulgar directrices y responder solicitudes ciudadanas.</li>
+              <li><b>7.5 Información Documentada:</b> Registro auditable de manuales, actas de comité, inventarios FUID y guías de intervención.</li>
+            </ul>
+          </div>
+
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>🔄 Capítulo 8: Operación del SGD</span>
+              <span class="card-tag mono">PROCESOS DE NEGOCIO</span>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>8.1 Planificación y Control Operacional:</b> Definición de criterios y flujos de trabajo estandarizados para que cada oficina produzca solo los documentos necesarios.</li>
+              <li><b>8.2 Procesos de Gestión Documental:</b> Ejecución rigurosa de los procesos normativos de creación y control detallados en el Anexo A.</li>
+              <li><b>8.3 Integración con Sistemas Heredados:</b> Saneamiento de fondos acumulados y migración de inventarios FUID hacia el software SGD oficial para unificar la custodia.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 4: EVALUACIÓN & MEJORA (CAPÍTULOS 9 Y 10) -->
+      <div id="sub-iso-eval" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card amber-card">
+            <div class="card-title orb" style="color: var(--neon-amber);">
+              <span>📊 Capítulo 9: Evaluación del Desempeño</span>
+              <span class="card-tag mono">AUDITORÍA Y SEGUIMIENTO</span>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>9.1 Seguimiento, Medición y Análisis:</b> Indicadores de cumplimiento del SGD (porcentaje de fondos organizados, tiempos de respuesta a tutelas, índices de conformidad de foliación).</li>
+              <li><b>9.2 Auditoría Interna:</b> Evaluaciones periódicas independientes para verificar conformidad con ISO 30301 y lineamientos del AGN.</li>
+              <li><b>9.3 Revisión por la Dirección:</b> Informes formales anuales a la Dirección General para asegurar la idoneidad y eficacia del sistema.</li>
+            </ul>
+          </div>
+
+          <div class="col-6 cyber-card red-card">
+            <div class="card-title orb" style="color: var(--neon-red);">
+              <span>🚀 Capítulo 10: Mejora Continua y No Conformidad</span>
+              <span class="card-tag mono">CIERRE DEL CICLO PHVA</span>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>10.1 No Conformidad y Acción Correctiva:</b> Protocolo ante desviaciones críticas (ejemplo: expedientes sin foliar, mezcla indebida de periodos, ataques de hongos no tratados).</li>
+              <li><b>10.2 Mejora Continua:</b> Adopción de tecnologías emergentes, optimización de espacios de almacenamiento y actualización continua de instrumentos archivísticos para evitar la reaparición de pasivos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 5: ANEXO A NORMATIVO (COMPLETO) -->
+      <div id="sub-iso-anexo" class="subpane">
+        <div class="grid-12">
+          <!-- Procesos de Creación -->
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>✍️ Anexo A: Procesos de Creación de Documentos</span>
+              <span class="card-tag mono">REQUISITOS A.1 A A.3</span>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>A.1 Determinación de Documentos que Deben Crearse</summary>
+              <div class="dossier-content">
+                Identificación legal y funcional de qué documentos son requeridos para evidenciar cada proceso, transacción o acto administrativo. Impide la producción de documentos superfluos.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>A.2 Contenido, Contexto y Estructura del Documento</summary>
+              <div class="dossier-content">
+                Exigencia de que los documentos posean los elementos indispensables para ser fidedignos: autoría clara, fecha fehaciente, destinatario, asunto unívoco y vínculo con el expediente madre.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>A.3 Captura y Registro de Documentos</summary>
+              <div class="dossier-content">
+                Mecanismos de radicación formal, digitalización certificada y asignación de identificador único e inmutable en el sistema de gestión.
+              </div>
+            </div>
+          </div>
+
+          <!-- Procesos de Control -->
+          <div class="col-6 cyber-card cyan-card">
+            <div class="card-title orb" style="color: var(--neon-cyan);">
+              <span>🔐 Anexo A: Procesos de Control de Documentos</span>
+              <span class="card-tag mono">REQUISITOS B.1 A B.5</span>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>B.1 Asignación y Gestión de Metadatos</summary>
+              <div class="dossier-content">
+                Asignación de atributos contextuales descriptivos, estructurales y de preservación (esquema de metadatos estandarizado Dublin Core o similar).
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>B.2 Almacenamiento y Preservación Física y Digital</summary>
+              <div class="dossier-content">
+                Custodia física en cajas y carpetas desacidificadas, y conservación digital con control de obsolescencia de formatos y copias de seguridad redundantes.
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>B.3 Acceso, Recuperación y Derechos de Seguridad</summary>
+              <div class="dossier-content">
+                Matrices de permisos, control de confidencialidad según Ley 1712 de 2014 y pistas de auditoría (logs) de quién consulta cada documento.
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>B.4 Migración y Conversión Tecnológica</summary>
+              <div class="dossier-content">
+                Procedimientos validados para transferir datos entre medios de almacenamiento sin pérdida de autenticidad, metadatos o estructura original.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>B.5 Disposición Final Autorizada (TVD / TRD)</summary>
+              <div class="dossier-content">
+                Ejecución controlada de las decisiones archivísticas: <b>Conservación Total</b> (transferencia al AGN), <b>Eliminación Reglada</b> (mediante acta y técnica autorizada) o <b>Selección/Muestreo</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         MÓDULO 02: METODOLOGÍA LEGAL Y TÉCNICA TVD (AGN)
+         ======================================================== -->
+    <section id="view-mod2" class="view-section">
+      <div class="pillar-headline cyan">
+        <div>
+          <div class="pillar-question mono">MÓDULO 02 · MARCO ARCHIVÍSTICO NACIONAL</div>
+          <h2 class="pillar-conclusion orb">Metodología TVD - Radicado AGN 2-2015-02615</h2>
+          <p class="pillar-tech-name">Intervención técnica de fondos acumulados según el Archivo General de la Nación (AGN). Las 5 fases perentorias, confección de FUID y ruta de convalidación oficial en 90 días.</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn" onclick="navigateTo('mod1')">◀ ANTERIOR</button>
+          <button class="cbtn cyan" onclick="navigateTo('mod3')">SIGUIENTE (ISO 31000) ▶</button>
+        </div>
+      </div>
+
+      <!-- Sub-navegador de TVD AGN -->
+      <div class="subtabs-bar">
+        <button class="subtab-btn active" onclick="switchSubtab('mod2', 'sub-tvd-fases', this)">LAS 5 FASES DE INTERVENCIÓN</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod2', 'sub-tvd-fuid', this)">INSTRUMENTO FUID & PRINCIPIOS</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod2', 'sub-tvd-flow', this)">RUTA CRÍTICA: APROBACIÓN & 90 DÍAS AGN</button>
+      </div>
+
+      <!-- SUBPANE 1: LAS 5 FASES METODOLÓGICAS -->
+      <div id="sub-tvd-fases" class="subpane active">
+        <!-- Barra Visual de 5 Fases -->
+        <div class="timeline-phases mono">
+          <div class="phase-step active" onclick="showPhaseDetail(1)">
+            <div class="phase-num">01</div>
+            <div class="phase-title">Compilación Histórica</div>
+            <div class="phase-sub">Evolución orgánica</div>
+          </div>
+          <div class="phase-step" onclick="showPhaseDetail(2)">
+            <div class="phase-num">02</div>
+            <div class="phase-title">Diagnóstico Integral</div>
+            <div class="phase-sub">Censo y estado físico</div>
+          </div>
+          <div class="phase-step" onclick="showPhaseDetail(3)">
+            <div class="phase-num">03</div>
+            <div class="phase-title">Formulación PAI</div>
+            <div class="phase-sub">Plan y bioseguridad</div>
+          </div>
+          <div class="phase-step" onclick="showPhaseDetail(4)">
+            <div class="phase-num">04</div>
+            <div class="phase-title">Ejecución Técnica</div>
+            <div class="phase-sub">Foliación y FUID</div>
+          </div>
+          <div class="phase-step" onclick="showPhaseDetail(5)">
+            <div class="phase-num">05</div>
+            <div class="phase-title">Valoración & TVD</div>
+            <div class="phase-sub">Disposición final</div>
+          </div>
+        </div>
+
+        <!-- Contenedor Dinámico de Detalles de la Fase -->
+        <div id="phaseDetailCard" class="cyber-card cyan-card">
+          <div class="card-title orb" id="phaseCardTitle" style="color: var(--neon-cyan);">
+            <span>Fase 1: Compilación e Investigación Histórica-Institucional</span>
+            <span class="card-tag mono">FUNDAMENTO AGN</span>
+          </div>
+          <div id="phaseCardBody">
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              Investigación jurídica e institucional para reconstruir la historia del organismo productor a través del tiempo. Se analizan decretos, resoluciones, leyes de creación, modificaciones de estructura, organigramas y manuales de funciones.
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>Delimitación de Periodos:</b> Identificación de los quiebres estructurales en el organigrama para fijar cortes temporales que jamás deben mezclarse.</li>
+              <li><b>Cuadro de Evolución Orgánica:</b> Mapeo de cómo las funciones cambiaron de dependencia a lo largo de las reformas administrativas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 2: FUID & PRINCIPIOS ARCHIVÍSTICOS -->
+      <div id="sub-tvd-fuid" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>📑 Formato Único de Inventario Documental (FUID)</span>
+              <span class="card-tag mono">HERRAMIENTA NORMATIVA</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              El FUID es el instrumento de recuperación técnica por excelencia exigido por el AGN (Decreto 2578/2012 y Acuerdo 002/2004). Contiene campos estandarizados de obligado cumplimiento:
+            </p>
+            <table class="tactical-table mono" style="font-size: 12.5px;">
+              <thead>
+                <tr>
+                  <th>Campo FUID</th>
+                  <th>Requisito Técnico AGN</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b style="color: var(--neon-green);">No. de Orden</b></td>
+                  <td>Numeración consecutiva e invariable del asiento de inventario.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-cyan);">Código</b></td>
+                  <td>Código de la serie o asunto según la codificación orgánica histórica.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: #fff;">Nombre de la Serie / Asunto</b></td>
+                  <td>Denominación unívoca del expediente sin abreviaturas genéricas.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-amber);">Fechas Extremas</b></td>
+                  <td>Año, mes y día del primer documento y del documento de cierre.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-purple);">Unidad de Conservación</b></td>
+                  <td>Caja, Carpeta, Tomo u otro soporte contenedor con su número.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-cyan);">Número de Folios</b></td>
+                  <td>Foliación exacta realizada en la esquina superior derecha a lápiz HB.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-red);">Notas / Observaciones</b></td>
+                  <td>Registro del estado físico, hojas testigo de aislamiento biológico o mutilaciones.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-6 cyber-card amber-card">
+            <div class="card-title orb" style="color: var(--neon-amber);">
+              <span>⚠️ Principios Inquebrantables del Radicado 2-2015-02615</span>
+              <span class="card-tag mono" style="border-color: var(--neon-amber); color: var(--neon-amber);">DOCTRINA AGN</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              El concepto vinculante del Archivo General de la Nación establece directrices terminantes que de violarse causan la nulidad del proceso de convalidación:
+            </p>
+            <div class="dossier-acc" open>
+              <summary>Principio de Procedencia y Orden Original</summary>
+              <div class="dossier-content">
+                Cada documento debe conservarse en el fondo de la unidad orgánica que lo produjo de acuerdo con sus funciones legítimas. <b>Queda estrictamente prohibido reorganizar expedientes antiguos según el organigrama actual del SENA</b>.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>Separación Irrestricta de FUIDs por Periodo Histórico</summary>
+              <div class="dossier-content">
+                Bajo ninguna circunstancia se consolidan periodos de estructuras diferentes en un solo listado. Si una entidad tuvo 3 reformas que alteraron sus dependencias, se deben confeccionar <b>3 FUIDs independientes</b>.
+              </div>
+            </div>
+            <div class="dossier-acc">
+              <summary>Prohibición de Eliminaciones de Hecho</summary>
+              <div class="dossier-content">
+                Ningún documento puede destruirse o descartarse sin que la TVD haya sido aprobada formalmente y cuente con concepto técnico favorable convalidado.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 3: RUTA CRÍTICA & CONVALIDACIÓN 90 DÍAS -->
+      <div id="sub-tvd-flow" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>🏛️ Paso 1: Aprobación Interna Institucional</span>
+              <span class="card-tag mono">ACUERDO 004/2013 ART. 8</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              Previo a cualquier radicación externa, la entidad debe agotar el debido proceso interno:
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>Presentación ante el Comité Interno de Archivo:</b> Sustentación técnica por parte del equipo interdisciplinario (archivistas, abogados e ingenieros).</li>
+              <li><b>Suscripción del Acta de Aprobación:</b> Documento suscrito por todos los miembros del comité convalidando las tablas de retención y valoración.</li>
+              <li><b>Expedición de Acto Administrativo:</b> Firma y promulgación de Resolución formal por parte de la Dirección General adoptando la propuesta de TVD.</li>
+            </ul>
+          </div>
+
+          <div class="col-6 cyber-card red-card">
+            <div class="card-title orb" style="color: var(--neon-red);">
+              <span>⏱️ Paso 2: Convalidación Oficial ante el AGN (90 Días)</span>
+              <span class="card-tag mono" style="border-color: var(--neon-red); color: var(--neon-red);">ACUERDO 004/2013 ART. 11</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              Una vez expedido el acto administrativo, se inicia el conteo del término perentorio de ley:
+            </p>
+            <div style="background: rgba(255, 56, 96, 0.15); border: 1px solid var(--neon-red); padding: 12px; margin-bottom: 12px;" class="mono">
+              <b style="color: var(--neon-red); font-size: 14px;">PLAZO PERENTORIO: 90 DÍAS CALENDARIO</b>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Término improrrogable para radicar el expediente completo ante el Archivo General de la Nación o Consejo Departamental/Distrital de Archivos.
+              </div>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>Revisión Técnica Especializada:</b> Evaluación por los peritos del AGN contrastando la historia institucional, los FUIDs y los criterios de valoración.</li>
+              <li><b>Subsanación de Observaciones:</b> Plazo específico para responder requerimientos del comité evaluador del AGN.</li>
+              <li><b>Concepto Técnico Favorable Vinculante:</b> Emisión del aval formal que otorga validez legal definitiva a la TVD.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         MÓDULO 03: GESTIÓN INTEGRAL DEL RIESGO (NTC-ISO 31000)
+         ======================================================== -->
+    <section id="view-mod3" class="view-section">
+      <div class="pillar-headline amber">
+        <div>
+          <div class="pillar-question mono">MÓDULO 03 · CONTROL PREVENTIVO Y GOBERNANZA DE AMENAZAS</div>
+          <h2 class="pillar-conclusion orb">Norma Técnica NTC-ISO 31000:2018</h2>
+          <p class="pillar-tech-name">Marco de gestión de riesgos: Cláusula 3 (Definiciones), Cláusula 4 (8 Principios), Cláusula 5 (Framework y Risk Owners 5.4.3) y Cláusula 6 (Metodología Operativa con Matriz 5x5).</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn" onclick="navigateTo('mod2')">◀ ANTERIOR</button>
+          <button class="cbtn cyan" onclick="navigateTo('mod4')">SIGUIENTE (CASO PRÁCTICO) ▶</button>
+        </div>
+      </div>
+
+      <!-- Sub-navegador de ISO 31000 -->
+      <div class="subtabs-bar">
+        <button class="subtab-btn active" onclick="switchSubtab('mod3', 'sub-risk-def', this)">CLÁUSULA 3: DEFINICIONES</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod3', 'sub-risk-prin', this)">CLÁUSULA 4: LOS 8 PRINCIPIOS</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod3', 'sub-risk-frame', this)">CLÁUSULA 5: GOBERNANZA & RISK OWNERS</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod3', 'sub-risk-proc', this)">CLÁUSULA 6: PROCESO OPERATIVO</button>
+        <button class="subtab-btn" onclick="switchSubtab('mod3', 'sub-risk-mat', this)">MATRIZ INTERACTIVA 5x5</button>
+      </div>
+
+      <!-- SUBPANE 1: DEFINICIONES FUNDAMENTALES -->
+      <div id="sub-risk-def" class="subpane active">
+        <div class="grid-12">
+          <div class="col-12 cyber-card">
+            <div class="card-title orb">
+              <span>📖 Glosario Técnico Fundamental (Cláusula 3 de la NTC-ISO 31000)</span>
+              <span class="card-tag mono">TERMINOLOGÍA OFICIAL</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-top: 10px;" class="mono">
+              <div style="background: rgba(0, 229, 255, 0.05); padding: 12px; border-left: 3px solid var(--neon-cyan);">
+                <b style="color: var(--neon-cyan);">3.1 Riesgo:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Efecto de la incertidumbre sobre la consecución de los objetivos institucionales.</div>
+              </div>
+              <div style="background: rgba(0, 255, 102, 0.05); padding: 12px; border-left: 3px solid var(--neon-green);">
+                <b style="color: var(--neon-green);">3.2 Gestión del Riesgo:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Actividades coordinadas para dirigir y controlar la organización con respecto al riesgo.</div>
+              </div>
+              <div style="background: rgba(255, 176, 32, 0.05); padding: 12px; border-left: 3px solid var(--neon-amber);">
+                <b style="color: var(--neon-amber);">3.3 Parte Interesada:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Persona u organización que puede afectar, verse afectada o percibirse afectada por una decisión o actividad.</div>
+              </div>
+              <div style="background: rgba(255, 56, 96, 0.05); padding: 12px; border-left: 3px solid var(--neon-red);">
+                <b style="color: var(--neon-red);">3.4 Fuente de Riesgo:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Elemento que, por sí solo o en combinación, tiene el potencial intrínseco de generar riesgo (ej. humedad relativa > 70%).</div>
+              </div>
+              <div style="background: rgba(192, 132, 252, 0.05); padding: 12px; border-left: 3px solid var(--neon-purple);">
+                <b style="color: var(--neon-purple);">3.5 Evento:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Ocurrencia o cambio de un conjunto particular de circunstancias (ej. brote infeccioso fúngico).</div>
+              </div>
+              <div style="background: rgba(255, 56, 96, 0.05); padding: 12px; border-left: 3px solid var(--neon-red);">
+                <b style="color: var(--neon-red);">3.6 Consecuencia:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Resultado de un evento que afecta a los objetivos (ej. pérdida irreversible de folios históricos o intoxicación laboral).</div>
+              </div>
+              <div style="background: rgba(0, 229, 255, 0.05); padding: 12px; border-left: 3px solid var(--neon-cyan);">
+                <b style="color: var(--neon-cyan);">3.7 Probabilidad:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Posibilidad de que ocurra un evento determinado dentro de un intervalo temporal definido.</div>
+              </div>
+              <div style="background: rgba(0, 255, 102, 0.05); padding: 12px; border-left: 3px solid var(--neon-green);">
+                <b style="color: var(--neon-green);">3.8 Control:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">Medida que mantiene y/o modifica el riesgo (ej. aislamiento en bolsa hermética con hoja testigo, EPP Nivel 3).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 2: LOS 8 PRINCIPIOS RECTORES -->
+      <div id="sub-risk-prin" class="subpane">
+        <div class="grid-12">
+          <div class="col-12 cyber-card amber-card">
+            <div class="card-title orb" style="color: var(--neon-amber);">
+              <span>⭐ Los 8 Principios Rectores (Cláusula 4 de la NTC-ISO 31000)</span>
+              <span class="card-tag mono">PROPÓSITO: CREACIÓN Y PROTECCIÓN DEL VALOR</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 14px;">
+              Los principios son los fundamentos que guían la toma de decisiones en todos los niveles institucionales:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;" class="mono">
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(0, 255, 102, 0.3);">
+                <b style="color: var(--neon-green);">1. Integrada:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Parte fundamental de todas las actividades organizacionales y del ciclo de vida documental.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
+                <b style="color: var(--neon-cyan);">2. Estructurada y Exhaustiva:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Enfoque consistente y sistemático que produce resultados reproducibles y comparables.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(255, 176, 32, 0.3);">
+                <b style="color: var(--neon-amber);">3. Adaptada:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Alineada con el contexto institucional del SENA y los objetivos de formación técnica.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(192, 132, 252, 0.3);">
+                <b style="color: var(--neon-purple);">4. Inclusiva:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Participación oportuna y adecuada de archiveros, abogados, auditores y directivos.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(0, 255, 102, 0.3);">
+                <b style="color: var(--neon-green);">5. Dinámica:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Capacidad de respuesta ante cambios estructurales, nuevos hallazgos biológicos o reformas legales.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
+                <b style="color: var(--neon-cyan);">6. Mejor Información Disponible:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Basada en censos reales (1.500 m.l.), análisis microbiológicos y normatividad histórica fehaciente.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(255, 176, 32, 0.3);">
+                <b style="color: var(--neon-amber);">7. Factores Humanos y Culturales:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Reconoce la influencia del comportamiento humano y las capacidades de los funcionarios.</div>
+              </div>
+              <div style="background: rgba(10, 16, 30, 0.8); padding: 12px; border: 1px solid rgba(255, 56, 96, 0.3);">
+                <b style="color: var(--neon-red);">8. Mejora Continua:</b>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">Aprendizaje constante a través de auditorías, lecciones aprendidas e innovación técnica.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 3: GOBERNANZA & RISK OWNERS -->
+      <div id="sub-risk-frame" class="subpane">
+        <div class="grid-12">
+          <div class="col-6 cyber-card">
+            <div class="card-title orb">
+              <span>🏗️ Estructura del Framework (Cláusula 5)</span>
+              <span class="card-tag mono">ARQUITECTURA INSTITUCIONAL</span>
+            </div>
+            <ul class="cyber-list mono">
+              <li><b>5.2 Liderazgo y Compromiso:</b> Mandato explícito para dotar recursos y priorizar el saneamiento del pasivo.</li>
+              <li><b>5.3 Integración:</b> El marco de riesgo se articula con el Sistema Integrado de Gestión (SIG) y el SGD.</li>
+              <li><b>5.4 Diseño del Marco:</b> Contexto (5.4.1), compromiso (5.4.2), asignación de roles y recursos (5.4.4).</li>
+              <li><b>5.5 Implementación:</b> Ejecución de los planes en los depósitos de archivo.</li>
+              <li><b>5.6 Valoración:</b> Medición periódica de la eficacia de los controles implementados.</li>
+              <li><b>5.7 Mejora:</b> Adaptación continua del marco frente a nuevos requerimientos.</li>
+            </ul>
+          </div>
+
+          <div class="col-6 cyber-card red-card">
+            <div class="card-title orb" style="color: var(--neon-red);">
+              <span>🎯 Cláusula 5.4.3: Asignación de 'Risk Owners'</span>
+              <span class="card-tag mono" style="border-color: var(--neon-red); color: var(--neon-red);">DUEÑOS DEL RIESGO</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 12px;">
+              La NTC-ISO 31000 exige que <b>todo riesgo identificado tenga una persona con la autoridad y responsabilidad directa para gestionarlo</b>. Sin un 'Risk Owner', los planes de tratamiento no se cumplen:
+            </p>
+            <div class="dossier-acc" open>
+              <summary>Risk Owner 1: Líder de Seguridad y Salud en el Trabajo (SST)</summary>
+              <div class="dossier-content">
+                <b>Riesgo Asignado:</b> Riesgo Biológico (15% del fondo infectado por hongos/insectos).<br>
+                <b>Autoridad:</b> Ordenar evacuaciones, restringir accesos, verificar dotación de EPP Nivel 3 y auditar desinfecciones.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>Risk Owner 2: Asesor Jurídico y Líder de Gestión Documental</summary>
+              <div class="dossier-content">
+                <b>Riesgo Asignado:</b> Pérdida de Memoria Legal e Histórica.<br>
+                <b>Autoridad:</b> Conducir las mesas de valoración técnica, dictaminar vigencias de derechos ciudadanos y prohibir eliminaciones no sustentadas.
+              </div>
+            </div>
+            <div class="dossier-acc" open>
+              <summary>Risk Owner 3: Director del Proyecto Archivístico</summary>
+              <div class="dossier-content">
+                <b>Riesgo Asignado:</b> Incumplimiento Normativo del Plazo Legal de 90 Días ante el AGN.<br>
+                <b>Autoridad:</b> Controlar la ruta crítica del cronograma y radicar oportunamente los expedientes convalidados.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 4: METODOLOGÍA OPERATIVA (CLÁUSULA 6) -->
+      <div id="sub-risk-proc" class="subpane">
+        <div class="grid-12">
+          <div class="col-12 cyber-card cyan-card">
+            <div class="card-title orb" style="color: var(--neon-cyan);">
+              <span>🔄 Ciclo Operativo del Proceso de Gestión del Riesgo (Cláusula 6)</span>
+              <span class="card-tag mono">FLUJO TÁCTICO</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 14px;">
+              Diagrama secuencial e iterativo que debe ejecutarse en cada depósito y etapa del fondo acumulado:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;" class="mono">
+              <div style="background: rgba(12, 22, 40, 0.9); border-top: 3px solid var(--neon-cyan); padding: 12px;">
+                <b style="color: var(--neon-cyan);">6.2 Comunicación y Consulta</b>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Diálogo permanente con las partes interesadas y el equipo técnico de campo.</div>
+              </div>
+              <div style="background: rgba(12, 22, 40, 0.9); border-top: 3px solid var(--neon-green); padding: 12px;">
+                <b style="color: var(--neon-green);">6.3 Alcance, Contexto y Criterios</b>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Fijación de umbrales de tolerancia y escalas de impacto (leve, moderado, severo, catastrófico).</div>
+              </div>
+              <div style="background: rgba(12, 22, 40, 0.9); border-top: 3px solid var(--neon-amber); padding: 12px;">
+                <b style="color: var(--neon-amber);">6.4 Evaluación del Riesgo</b>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">• 6.4.2 Identificación<br>• 6.4.3 Análisis de Causas/Efectos<br>• 6.4.4 Valoración en Matriz</div>
+              </div>
+              <div style="background: rgba(12, 22, 40, 0.9); border-top: 3px solid var(--neon-red); padding: 12px;">
+                <b style="color: var(--neon-red);">6.5 Tratamiento del Riesgo</b>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Selección de opciones (mitigar, transferir, evitar, aceptar) y formulación de planes.</div>
+              </div>
+              <div style="background: rgba(12, 22, 40, 0.9); border-top: 3px solid var(--neon-purple); padding: 12px;">
+                <b style="color: var(--neon-purple);">6.6 y 6.7 Seguimiento y Registro</b>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Monitoreo de indicadores, auditorías de trazabilidad e informes de rendición de cuentas.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPANE 5: MATRIZ DE RIESGO 5x5 INTERACTIVA -->
+      <div id="sub-risk-mat" class="subpane">
+        <div class="grid-12">
+          <div class="col-7 cyber-card">
+            <div class="card-title orb">
+              <span>🎯 Matriz 5x5 de Evaluación (Probabilidad vs Consecuencia)</span>
+              <span class="card-tag mono">SIMULADOR CL. 6.4.4</span>
+            </div>
+            <p style="color: var(--text-dim); margin-bottom: 10px;">
+              Haga clic en cualquier celda para simular la severidad del riesgo y visualizar el tratamiento obligatorio según la norma:
+            </p>
+
+            <div class="matrix-grid mono">
+              <div></div>
+              <div class="m-header">1. INSIGNIFICANTE</div>
+              <div class="m-header">2. MENOR</div>
+              <div class="m-header">3. MODERADO</div>
+              <div class="m-header">4. MAYOR</div>
+              <div class="m-header">5. CATATRÓFICO</div>
+
+              <div class="m-row-lbl">5. CASI SEGURO</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(5, 1, 'Medio (5)', 'Monitoreo preventivo rutinario')">5</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(5, 2, 'Medio (10)', 'Plan de contingencia documentado')">10</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(5, 3, 'Alto (15)', 'Tratamiento correctivo prioritario')">15</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(5, 4, 'Extremo (20)', 'Intervención inmediata de la Alta Dirección')">20</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(5, 5, 'Crítico Extremo (25)', 'Suspensión inmediata de labores y aislamiento')">25</div>
+
+              <div class="m-row-lbl">4. PROBABLE</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(4, 1, 'Bajo (4)', 'Aceptable con control estándar')">4</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(4, 2, 'Medio (8)', 'Revisión periódica de controles')">8</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(4, 3, 'Alto (12)', 'Asignación formal de Risk Owner')">12</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(4, 4, 'Extremo (16)', 'Acción inmediata: Aislamiento biológico y EPP')">16</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(4, 5, 'Extremo (20)', 'Tratamiento de choque y mesa de crisis')">20</div>
+
+              <div class="m-row-lbl">3. POSIBLE</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(3, 1, 'Bajo (3)', 'Aceptable con supervisión')">3</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(3, 2, 'Medio (6)', 'Medidas de conservación preventiva')">6</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(3, 3, 'Medio (9)', 'Mesas interdisciplinarias de valoración')">9</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(3, 4, 'Alto (12)', 'Riesgo de pérdida de memoria histórica')">12</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(3, 5, 'Extremo (15)', 'Sanciones disciplinarias por caducidad')">15</div>
+
+              <div class="m-row-lbl">2. IMPROBABLE</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(2, 1, 'Bajo (2)', 'Riesgo residual tolerable')">2</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(2, 2, 'Bajo (4)', 'Control archivístico ordinario')">4</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(2, 3, 'Medio (6)', 'Monitoreo de semáforo de 90 días')">6</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(2, 4, 'Medio (8)', 'Revisión técnica de FUIDs')">8</div>
+              <div class="m-cell m-high" onclick="selectMatrixRisk(2, 5, 'Alto (10)', 'Auditoría interna de control')">10</div>
+
+              <div class="m-row-lbl">1. RARO</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(1, 1, 'Muy Bajo (1)', 'Asumible sin acción adicional')">1</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(1, 2, 'Bajo (2)', 'Supervisión en ciclo PHVA')">2</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(1, 3, 'Bajo (3)', 'Registro de trazabilidad')">3</div>
+              <div class="m-cell m-low" onclick="selectMatrixRisk(1, 4, 'Bajo (4)', 'Archivo pasivo bajo custodia')">4</div>
+              <div class="m-cell m-med" onclick="selectMatrixRisk(1, 5, 'Medio (5)', 'Póliza de seguro documental')">5</div>
+            </div>
+          </div>
+
+          <div class="col-5 cyber-card red-card">
+            <div class="card-title orb" style="color: var(--neon-red);">
+              <span>📊 Diagnóstico del Riesgo Seleccionado</span>
+              <span class="card-tag mono" id="riskSelectedTag">CELDA SELECCIONADA</span>
+            </div>
+            <div id="riskSimResult">
+              <div style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px;" id="riskSimLevel">
+                Extremo (16) · Afección Biológica Severa
+              </div>
+              <p style="color: var(--text-dim); margin-bottom: 12px;" id="riskSimDesc">
+                Corresponde a la presencia de hongos e insectos en el 15% del fondo acumulado (1.500 m.l.).
+              </p>
+              <div style="background: rgba(0, 0, 0, 0.4); padding: 12px; border-left: 3px solid var(--neon-red);" class="mono">
+                <b style="color: var(--neon-red);">Tratamiento Obligatorio (Cl. 6.5):</b>
+                <div style="font-size: 12px; color: #fff; margin-top: 4px;" id="riskSimAction">
+                  Aislamiento físico preventivo en cuarentena, uso de Hoja Testigo cruzada, dotación estricta de EPP Nivel 3 y desinfección química no abrasiva.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         MÓDULO 04: CASO PRÁCTICO APLICADO (FONDO 1.500 M.L.)
+         ======================================================== -->
+    <section id="view-mod4" class="view-section">
+      <div class="pillar-headline red">
+        <div>
+          <div class="pillar-question mono">MÓDULO 04 · DESPLIEGUE OPERATIVO Y APLICACIÓN REAL</div>
+          <h2 class="pillar-conclusion orb">Caso Práctico: Fondo Acumulado de 1.500 m.l. (1991–2010)</h2>
+          <p class="pillar-tech-name">Desarrollo metódico de los 5 pasos técnicos aplicados sobre un acervo crítico con 15% de afectación biológica, delimitación de 3 periodos y convalidación en 90 días.</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn" onclick="navigateTo('mod3')">◀ ANTERIOR (ISO 31000)</button>
+          <button class="cbtn cyan" onclick="navigateTo('mod5')">IR AL VIDEO EXPOSITIVO (PLAN) ▶</button>
+        </div>
+      </div>
+
+      <!-- Ficha de Datos del Caso -->
+      <div class="grid-12" style="margin-bottom: 16px;">
+        <div class="col-4 cyber-card">
+          <div class="card-title orb">
+            <span>📦 Línea de Base del Acervo</span>
+            <span class="card-tag mono">CENSO FÍSICO</span>
+          </div>
+          <ul class="cyber-list mono">
+            <li><b>Volumen Total:</b> 1.500 metros lineales de expedientes en desorden.</li>
+            <li><b>Ventana Cronológica:</b> 1991 a 2010 (20 años de historia institucional).</li>
+            <li><b>Estado de Conservación:</b> 15% del acervo contaminado por hongos filamentosos y termitas.</li>
+            <li><b>Soportes:</b> Papel bond, carpetas ácidas, ganchos metálicos oxidados y cintas degradadas.</li>
+          </ul>
+        </div>
+
+        <div class="col-4 cyber-card cyan-card">
+          <div class="card-title orb" style="color: var(--neon-cyan);">
+            <span>🏛️ Los 3 Periodos Históricos Identificados</span>
+            <span class="card-tag mono">ORGANIGRAMAS</span>
+          </div>
+          <ul class="cyber-list mono">
+            <li><b>Periodo I (1991–1995):</b> Estructura fundacional por Direcciones Generales centralizadas.</li>
+            <li><b>Periodo II (1995–2000):</b> Primera reestructuración con creación de Subdirecciones Técnicas regionales.</li>
+            <li><b>Periodo III (2000–2010):</b> Modernización administrativa con Módulos Especializados de formación.</li>
+          </ul>
+        </div>
+
+        <div class="col-4 cyber-card amber-card">
+          <div class="card-title orb" style="color: var(--neon-amber);">
+            <span>🛡️ Solución de Trazabilidad</span>
+            <span class="card-tag mono">DOCTRINA AGN</span>
+          </div>
+          <p style="color: var(--text-dim); margin-bottom: 8px;">
+            Conforme al <b>Radicado AGN 2-2015-02615</b>, se determinó:
+          </p>
+          <div style="background: rgba(255, 176, 32, 0.15); border-left: 3px solid var(--neon-amber); padding: 8px 12px;" class="mono">
+            <b style="color: #fff;">3 FUIDs INDEPENDIENTES:</b>
+            <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 2px;">
+              Prohibición absoluta de unificar inventarios. Cada periodo conserva su orden original y sus series específicas.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESARROLLO DE LOS 5 PASOS OPERATIVOS (EXPANDERS DETALLADOS) -->
+      <div class="col-12" style="margin-top: 10px;">
+        <!-- PASO 1 -->
+        <div class="dossier-acc" open>
+          <summary style="font-size: 16px; color: var(--neon-cyan);">
+            <span>Paso 1: Diagnóstico Inicial y Contexto Institucional (ISO 30301 Cl. 4.1 y AGN Paso 1-2)</span>
+            <span class="card-tag mono">EJECUTADO</span>
+          </summary>
+          <div class="dossier-content">
+            <p>
+              Se realizó la medición volumétrica métrica registrando exactamente <b>1.500 metros lineales</b> de documentación amontonada en cajas y estanterías sin criterio archivístico.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 10px;" class="mono">
+              <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-left: 2px solid var(--neon-cyan);">
+                <b>Investigación Normativa:</b> Recompilación de 14 decretos de modificación orgánica y acuerdos del Consejo Directivo Nacional del SENA entre 1991 y 2010.
+              </div>
+              <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-left: 2px solid var(--neon-red);">
+                <b>Muestreo Microbiológico:</b> Identificación de esporas de <i>Aspergillus</i> y <i>Penicillium</i> en el 15% del fondo, requiriendo cuarentena inmediata.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 2 -->
+        <div class="dossier-acc" open>
+          <summary style="font-size: 16px; color: var(--neon-red);">
+            <span>Paso 2: Evaluación Integral de Riesgos y Asignación de 'Risk Owners' (ISO 31000 Cl. 5.4.3 y 6.4)</span>
+            <span class="card-tag mono" style="border-color: var(--neon-red); color: var(--neon-red);">CRÍTICO</span>
+          </summary>
+          <div class="dossier-content">
+            <p style="margin-bottom: 10px;">
+              Se aplicó la matriz de valoración asignando dueños de riesgo con potestad presupuestal y operativa:
+            </p>
+            <table class="tactical-table mono" style="font-size: 12.5px;">
+              <thead>
+                <tr>
+                  <th>Riesgo Identificado</th>
+                  <th>Severidad (P x I)</th>
+                  <th>Risk Owner Asignado</th>
+                  <th>Plan de Tratamiento Implementado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b style="color: var(--neon-red);">Riesgo 1: Afección Biológica a la Salud y Documento</b></td>
+                  <td>Alta x Severa (16)</td>
+                  <td style="color: var(--neon-cyan);">Líder de Seguridad y Salud en el Trabajo (SST)</td>
+                  <td>Aislamiento en área de cuarentena, uso de Hoja Testigo cruzada, dotación de EPP Nivel 3 (filtros HEPA, trajes tyvek) y desinfección mecánica controlada.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-amber);">Riesgo 2: Pérdida Irreversible de Memoria Legal e Histórica</b></td>
+                  <td>Media x Crítica (12)</td>
+                  <td style="color: var(--neon-cyan);">Asesor Jurídico & Coordinador de Archivo</td>
+                  <td>Instalación de Mesas Interdisciplinarias de Valoración previas a la formulación de TVD para dictaminar series con valor histórico vs eliminables.</td>
+                </tr>
+                <tr>
+                  <td><b style="color: var(--neon-cyan);">Riesgo 3: Incumplimiento del Plazo Legal de 90 Días ante AGN</b></td>
+                  <td>Media x Moderada (8)</td>
+                  <td style="color: var(--neon-cyan);">Director del Proyecto Archivístico</td>
+                  <td>Implementación de tablero de ruta crítica semanal con alertas tempranas en días 30, 60 y 75 para radicación impecable del expediente.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PASO 3 -->
+        <div class="dossier-acc" open>
+          <summary style="font-size: 16px; color: var(--neon-green);">
+            <span>Paso 3: Ejecución Archivística, Aislamiento con 'Hoja Testigo' y 3 FUIDs (AGN Paso 4)</span>
+            <span class="card-tag mono" style="border-color: var(--neon-green); color: var(--neon-green);">OPERACIÓN</span>
+          </summary>
+          <div class="dossier-content">
+            <p>
+              Despliegue de los equipos de archivistas y auxiliares técnicos siguiendo estrictos protocolos de bioseguridad:
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>Limpieza y Aislamiento Biológico:</b> El 15% afectado fue retirado a carpa de desinfección en seco con brocha de cerda suave y aspiradoras con filtro HEPA.</li>
+              <li><b>Mecanismo de la Hoja Testigo:</b> En el lugar exacto donde se retiró un expediente o unidad contaminada, se insertó una <b>Hoja Testigo foliada</b> que certifica: número de radicado, fecha de retiro temporal, causa de aislamiento, nombre del restaurador responsable y ubicación en depósito de cuarentena.</li>
+              <li><b>Desmetalización y Foliación:</b> Retiro total de ganchos corrosivos, sustitución por ganchos plásticos y foliación a lápiz mina negra HB en la esquina superior derecha sin enmendaduras.</li>
+              <li><b>Elaboración de 3 FUIDs:</b> Confección de inventarios separados: FUID 1 (1991–1995: 380 m.l.), FUID 2 (1995–2000: 520 m.l.) y FUID 3 (2000–2010: 600 m.l.).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PASO 4 -->
+        <div class="dossier-acc" open>
+          <summary style="font-size: 16px; color: var(--neon-amber);">
+            <span>Paso 4: Aprobación Interna y Trámite de Convalidación Oficial ante el AGN (90 Días)</span>
+            <span class="card-tag mono" style="border-color: var(--neon-amber); color: var(--neon-amber);">CONVALIDACIÓN</span>
+          </summary>
+          <div class="dossier-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;" class="mono">
+              <div style="background: rgba(0, 255, 102, 0.08); padding: 12px; border-left: 3px solid var(--neon-green);">
+                <b style="color: var(--neon-green);">Aprobación Interna Institucional:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">
+                  • Sesión del Comité Interno de Archivo formalizada en <b>Acta No. 005</b>.<br>
+                  • Expedición de la <b>Resolución Institucional No. 0420</b> adoptando formalmente las Tablas de Valoración Documental (TVD) para el fondo 1991–2010.
+                </div>
+              </div>
+              <div style="background: rgba(0, 229, 255, 0.08); padding: 12px; border-left: 3px solid var(--neon-cyan);">
+                <b style="color: var(--neon-cyan);">Convalidación Oficial AGN:</b>
+                <div style="font-size: 12.5px; color: var(--text-dim); margin-top: 4px;">
+                  • Radicación formal del expediente (TVD + FUIDs + Memoria Descriptiva) en el día 22 posterior al acto administrativo.<br>
+                  • Acompañamiento a la visita técnica de peritos del AGN.<br>
+                  • <b>Emisión del Concepto Técnico Favorable de Convalidación</b> en el día 74 (dentro de los 90 días reglamentarios).
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 5 -->
+        <div class="dossier-acc" open>
+          <summary style="font-size: 16px; color: var(--neon-purple);">
+            <span>Paso 5: Integración al SGD ISO 30301 y Cierre Definitivo de Pasivos (ISO 30301 Cl. 8.3 & 10.2)</span>
+            <span class="card-tag mono" style="border-color: var(--neon-purple); color: var(--neon-purple);">CIERRE INSTITUCIONAL</span>
+          </summary>
+          <div class="dossier-content">
+            <p>
+              Consolidación de los resultados en la arquitectura directiva de la entidad:
+            </p>
+            <ul class="cyber-list mono">
+              <li><b>Migración Tecnológica al SGD:</b> Los metadatos de los 3 FUIDs fueron indexados en el software oficial de gestión documental (ISO 30301 Cl. 8.3 y Anexo A B.1), permitiendo la búsqueda en milisegundos de cualquier antecedente histórico.</li>
+              <li><b>Disposición Final Ejecutada:</b> Transferencia secundaria al Archivo Histórico de series de valor permanente y aplicación de actas de eliminación formal para documentación sin mérito secundario.</li>
+              <li><b>Saneamiento del Pasivo:</b> Se extinguió el 100% del fondo acumulado de 1.500 m.l., logrando depósitos saneados, desinfectados y con condiciones termo-higrométricas estables.</li>
+              <li><b>Mejora Continua y Lecciones Aprendidas (ISO 30301 Cl. 10.2):</b> Actualización de las Tablas de Retención Documental (TRD) para que las dependencias transfieran a tiempo sus archivos y <b>nunca más se genere un fondo acumulado en el SENA</b>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================
+         MÓDULO 05: TRANSMISIÓN AUDIOVISUAL · EL PLAN DE INTEGRACIÓN
+         ======================================================== -->
+    <section id="view-mod5" class="view-section">
+      <div class="pillar-headline" style="border-left-color: var(--neon-cyan);">
+        <div>
+          <div class="pillar-question mono">MÓDULO 05 · RECURSO AUDIOVISUAL DE DEFENSA INSTITUCIONAL</div>
+          <h2 class="pillar-conclusion orb">Transmisión Táctica: "El Plan de Integración"</h2>
+          <p class="pillar-tech-name">Proyección audiovisual de alta fidelidad orientada a comités directivos, evaluadores del AGN y auditorías integradas. Sustentación cinematográfica del modelo convergente ISO 30301 + TVD + ISO 31000.</p>
+        </div>
+        <div class="section-pager-btns mono">
+          <button class="cbtn" onclick="navigateTo('mod4')">◀ ANTERIOR (CASO PRÁCTICO)</button>
+          <button class="cbtn active" onclick="navigateTo('mod0')">VOLVER AL INICIO ↺</button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula Principal de Video y Telemetría -->
+      <div class="grid-12">
+        <!-- Contenedor Maestro del Reproductor Cibernético -->
+        <div class="col-8">
+          <div class="video-hud-wrapper">
+            <div class="video-screen-frame">
+              <!-- Overlay HUD Superior -->
+              <div class="video-feed-overlay mono">
+                <div class="video-hud-badge rec">
+                  <span class="rec-dot"></span>
+                  <span>FEED VINCULANTE ACTIVO</span>
+                </div>
+                <div class="video-hud-badge">
+                  <span>CANAL: SENA · ARCHIVO CENTRAL</span>
+                </div>
+                <div class="video-hud-badge" style="border-color: rgba(0, 229, 255, 0.5); color: var(--neon-cyan);">
+                  <span id="hudTimeDisplay">00:00 / 00:00</span>
+                </div>
+              </div>
+
+              <!-- Elemento de Video HTML5 -->
+              <video 
+                id="planVideo" 
+                class="video-element" 
+                preload="metadata" 
+                playsinline
+                controls
+                src="/assets/aistudio/El_Plan_de_Integraci_n_2af80554.mp4">
+                <p>Su navegador no soporta reproducción de video HTML5. Archivo: <code>/assets/aistudio/El_Plan_de_Integraci_n_2af80554.mp4</code></p>
+              </video>
+
+              <!-- Barra de Control Custom HUD Cibernética -->
+              <div class="custom-video-controls mono">
+                <button type="button" class="cbtn" id="btnVidPlayPause" onclick="togglePlayVideo()" style="padding: 5px 12px; font-weight: 700;">
+                  ▶ REPRODUCIR
+                </button>
+                <button type="button" class="cbtn cyan" onclick="restartVideo()" title="Reiniciar transmisión" style="padding: 5px 10px;">
+                  ⏮ REINICIAR
+                </button>
+                <button type="button" class="cbtn" onclick="skipVideo(-15)" title="Retroceder 15 segundos" style="padding: 5px 8px;">
+                  -15s
+                </button>
+                <button type="button" class="cbtn" onclick="skipVideo(15)" title="Adelantar 15 segundos" style="padding: 5px 8px;">
+                  +15s
+                </button>
+
+                <!-- Barra de Progreso Scrubber -->
+                <div class="vid-progress-container" id="vidProgressContainer" onclick="scrubVideo(event)" title="Haga clic para saltar en la línea de tiempo">
+                  <div class="vid-progress-bar" id="vidProgressBar"></div>
+                </div>
+
+                <span id="vidTimeCounter" style="font-size: 11px; color: var(--text-dim); min-width: 80px; text-align: center;">00:00 / 00:00</span>
+
+                <!-- Selector de Velocidad -->
+                <div style="display: flex; gap: 3px;">
+                  <button type="button" class="cbtn active speed-btn" data-speed="1" onclick="setVideoSpeed(1, this)" style="padding: 4px 6px; font-size: 10px;">1x</button>
+                  <button type="button" class="cbtn speed-btn" data-speed="1.25" onclick="setVideoSpeed(1.25, this)" style="padding: 4px 6px; font-size: 10px;">1.25x</button>
+                  <button type="button" class="cbtn speed-btn" data-speed="1.5" onclick="setVideoSpeed(1.5, this)" style="padding: 4px 6px; font-size: 10px;">1.5x</button>
+                </div>
+
+                <!-- Botón Pantalla Completa Video -->
+                <button type="button" class="cbtn cyan" onclick="toggleVideoFullscreen()" title="Pantalla completa del video" style="padding: 5px 10px;">
+                  ⛶ MAX
+                </button>
+              </div>
+            </div>
+
+            <!-- Navegación Rápida por Capítulos / Puntos del Video -->
+            <div style="margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span class="orb" style="font-size: 13.5px; color: var(--neon-cyan); letter-spacing: 0.05em;">
+                  ⚡ MARCADORES TEMPORALES TÁCTICOS (HAGA CLIC PARA SALTAR EN EL VIDEO)
+                </span>
+                <span class="mono" style="font-size: 11px; color: var(--text-muted);">NAVEGACIÓN INTERACTIVA</span>
+              </div>
+              <div class="chapters-grid mono">
+                <div class="chapter-card" onclick="seekVideo(0)">
+                  <div class="chapter-time">⏱ [00:00] · INICIO</div>
+                  <div class="chapter-name">Apertura del Plan y Planteamiento del Reto</div>
+                  <div class="chapter-desc">Presentación del pasivo histórico de fondos acumulados y la necesidad de una metodología técnica vinculante.</div>
+                </div>
+                <div class="chapter-card" onclick="seekVideo(45)">
+                  <div class="chapter-time" style="color: var(--neon-cyan);">⏱ [00:45] · PILAR 01</div>
+                  <div class="chapter-name">Gobernanza del SGD (ISO 30301)</div>
+                  <div class="chapter-desc">Estructura directiva, política institucional y articulación de responsabilidades directivas.</div>
+                </div>
+                <div class="chapter-card" onclick="seekVideo(115)">
+                  <div class="chapter-time" style="color: var(--neon-amber);">⏱ [01:55] · PILAR 02</div>
+                  <div class="chapter-name">Metodología TVD y Fases del AGN</div>
+                  <div class="chapter-desc">Reglas perentorias del Radicado 2-2015-02615: delimitación de periodos y elaboración de FUIDs separados.</div>
+                </div>
+                <div class="chapter-card" onclick="seekVideo(180)">
+                  <div class="chapter-time" style="color: var(--neon-red);">⏱ [03:00] · PILAR 03</div>
+                  <div class="chapter-name">Gestión del Riesgo y Risk Owners (ISO 31000)</div>
+                  <div class="chapter-desc">Tratamiento del riesgo biológico (15%), hoja testigo y protección de la memoria institucional.</div>
+                </div>
+                <div class="chapter-card" onclick="seekVideo(240)">
+                  <div class="chapter-time" style="color: var(--neon-purple);">⏱ [04:00] · CONVALIDACIÓN</div>
+                  <div class="chapter-name">Plazo Fatal de 90 Días y Cierre Definitivo</div>
+                  <div class="chapter-desc">Procedimiento del Acuerdo 004/2013 ante el AGN y consolidación en el archivo del SENA.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Lateral: Ficha Técnica y Argumentario de Exposición -->
+        <div class="col-4" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Ficha Técnica Audiovisual -->
+          <div class="cyber-card cyan-card">
+            <div class="card-title orb" style="color: var(--neon-cyan);">
+              <span>📽️ Ficha Técnica Audiovisual</span>
+              <span class="card-tag mono" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">METADATOS</span>
+            </div>
+            <ul class="cyber-list mono" style="font-size: 12.5px;">
+              <li><b>Nombre de Archivo:</b> <span style="color: var(--neon-cyan); word-break: break-all;">El_Plan_de_Integraci_n_2af80554.mp4</span></li>
+              <li><b>Contenido:</b> Sustentación cinematográfica del informe técnico integrado.</li>
+              <li><b>Resolución:</b> Alta Definición (1080p) con pista de audio explicativa.</li>
+              <li><b>Ubicación en Servidor:</b> <code>/assets/aistudio/El_Plan_de_Integraci_n_2af80554.mp4</code></li>
+              <li><b>Uso Institucional:</b> Material audiovisual para defensa técnica en Comité Interno de Archivo y sustento ante evaluadores del Archivo General de la Nación.</li>
+            </ul>
+          </div>
+
+          <!-- Guía para el Expositor -->
+          <div class="cyber-card">
+            <div class="card-title orb">
+              <span>🎯 Guía Rápida para el Expositor</span>
+              <span class="card-tag mono">PAUTAS AUDITORIO</span>
+            </div>
+            <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 10px;">
+              Instrucciones estratégicas para proyectar este video durante la sesión técnica:
+            </p>
+            <div class="speaker-note-box mono" style="margin-top: 0; font-size: 12px;">
+              <span class="speaker-icon">📢</span>
+              <div>
+                <b>1. Introducción previa:</b> Explique al comité que el video resume la articulación de los tres pilares antes de entrar a la discusión de las tablas de valoración.<br><br>
+                <b>2. Durante la proyección:</b> Utilice los <i>marcadores tácticos</i> inferiores si algún evaluador solicita profundizar en un punto específico (por ejemplo, el tratamiento del riesgo biológico o el plazo de los 90 días).<br><br>
+                <b>3. Cierre concluyente:</b> Finalice reafirmando que la ejecución de este plan cierra de forma definitiva los pasivos archivísticos acumulados en el SENA.
+              </div>
+            </div>
+          </div>
+
+          <!-- Cuadro de Compatibilidad y Respaldo -->
+          <div class="cyber-card amber-card">
+            <div class="card-title orb" style="color: var(--neon-amber);">
+              <span>💾 Respaldo y Acceso Directo</span>
+              <span class="card-tag mono" style="border-color: var(--neon-amber); color: var(--neon-amber);">SOPORTE LOCAL</span>
+            </div>
+            <p style="color: var(--text-dim); font-size: 12.5px; margin-bottom: 8px;">
+              El archivo audiovisual está incrustado en el almacenamiento local del sistema para garantizar reproducción instantánea sin depender de conexión externa a internet en auditorios cerrados o salas de comités.
+            </p>
+            <div style="background: rgba(0, 0, 0, 0.4); padding: 8px 10px; border-left: 2px solid var(--neon-amber); font-size: 11.5px;" class="mono">
+              <b>Modo Proyector:</b> Presione <b>[F]</b> para pantalla completa global o el botón <b>[⛶ MAX]</b> en la barra de video para aislar la transmisión en el telón de proyección.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pie Normativo Institucional -->
+  <footer class="normative-footer mono">
+    <p>
+      <b>REFERENCIAS TÉCNICAS Y MARCO JURÍDICO OFICIAL:</b> NTC-ISO 30301:2019 (Sistemas de Gestión para Documentos) · Ley 594 de 2000 (Ley General de Archivos) · Acuerdo 004 de 2013 y Acuerdo 004 de 2019 (Reglamentación y Convalidación TVD y TRD ante el Archivo General de la Nación) · Concepto Técnico Radicado AGN 2-2015-02615 · Norma Técnica Colombiana NTC-ISO 31000:2018 (Gestión del Riesgo: Directrices).
+    </p>
+    <div style="margin-top: 8px; color: var(--neon-green); font-size: 12px; letter-spacing: 0.05em;">
+      SERVICIO NACIONAL DE APRENDIZAJE (SENA) · CENTRO DE COMANDO Y GESTIÓN DOCUMENTAL INTEGRADA · BOGOTÁ D.C., COLOMBIA
+    </div>
+  </footer>
+
+  <!-- Lógica de Control, Exposición y Audio Sintético -->
+  <script>
+    /* ========================================================
+       WEB AUDIO SYNTHESIZER PARA EFECTOS DE COMANDO FUTURISTA
+       ======================================================== */
+    class CyberAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+      playBlip(freq = 660, type = 'square', duration = 0.09) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.4, now + duration * 0.7);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.01);
+        } catch(e) {}
+      }
+      playSuccess() {
+        this.playBlip(523, 'sine', 0.08);
+        setTimeout(() => this.playBlip(659, 'sine', 0.08), 80);
+        setTimeout(() => this.playBlip(784, 'sine', 0.12), 160);
+      }
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+    }
+    const audio = new CyberAudio();
+
+    /* ========================================================
+       NAVEGACIÓN POR MÓDULOS Y SLIDES DE PRESENTACIÓN
+       ======================================================== */
+    const MODULE_SLIDES = ['mod0', 'mod1', 'mod2', 'mod3', 'mod4', 'mod5'];
+    const MODULE_NAMES = [
+      '00 · RESUMEN & CONVERGENCIA SISTÉMICA',
+      '01 · GOBERNANZA SGD ISO 30301',
+      '02 · METODOLOGÍA TVD AGN (RAD. 2-2015-02615)',
+      '03 · GESTIÓN DEL RIESGO NTC-ISO 31000',
+      '04 · CASO PRÁCTICO APLICADO (1.500 M.L.)',
+      '05 · TRANSMISIÓN AUDIOVISUAL: EL PLAN DE INTEGRACIÓN'
+    ];
+    let currentModuleIdx = 0;
+    let isPresentationActive = false;
+
+    function navigateTo(modId) {
+      audio.playBlip(680);
+
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-view') === modId);
+      });
+
+      document.querySelectorAll('.view-section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+
+      const target = document.getElementById(`view-${modId}`);
+      if (target) {
+        target.classList.add('active');
+        animateNumbers(target);
+      }
+
+      // Pausa automática de video si el usuario cambia a otro módulo
+      const planVideoEl = document.getElementById('planVideo');
+      if (planVideoEl && modId !== 'mod5' && !planVideoEl.paused) {
+        planVideoEl.pause();
+        const playBtn = document.getElementById('btnVidPlayPause');
+        if (playBtn) playBtn.innerHTML = '▶ REPRODUCIR';
+      }
+
+      const idx = MODULE_SLIDES.indexOf(modId);
+      if (idx !== -1) {
+        currentModuleIdx = idx;
+        updatePresProgress();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function prevSlide() {
+      if (currentModuleIdx > 0) {
+        navigateTo(MODULE_SLIDES[currentModuleIdx - 1]);
+      } else {
+        navigateTo(MODULE_SLIDES[MODULE_SLIDES.length - 1]);
+      }
+    }
+
+    function nextSlide() {
+      if (currentModuleIdx < MODULE_SLIDES.length - 1) {
+        navigateTo(MODULE_SLIDES[currentModuleIdx + 1]);
+      } else {
+        navigateTo(MODULE_SLIDES[0]);
+      }
+    }
+
+    function updatePresProgress() {
+      const banner = document.getElementById('presProgress');
+      if (banner) {
+        banner.textContent = `SECCIÓN ${currentModuleIdx + 1} / ${MODULE_SLIDES.length} · ${MODULE_NAMES[currentModuleIdx]}`;
+      }
+    }
+
+    function togglePresentationMode() {
+      audio.playBlip(880);
+      isPresentationActive = !isPresentationActive;
+      document.body.classList.toggle('presentation-mode', isPresentationActive);
+
+      const btn = document.getElementById('btnPresentation');
+      if (isPresentationActive) {
+        btn.classList.add('active');
+        btn.innerHTML = '<span>✕ SALIR EXPOSICIÓN (ESC)</span>';
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '<span>▶ MODO EXPOSICIÓN (F)</span>';
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      updatePresProgress();
+    }
+
+    function toggleSound() {
+      const state = audio.toggle();
+      document.getElementById('soundIcon').textContent = state ? '🔊 AUDIO ON' : '🔇 AUDIO OFF';
+    }
+
+    /* ========================================================
+       SUB-TABS INTERNAS
+       ======================================================== */
+    function switchSubtab(modPrefix, targetSubId, btnEl) {
+      audio.playBlip(560);
+      const parent = document.getElementById(`view-${modPrefix}`);
+      if (!parent) return;
+
+      parent.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+
+      parent.querySelectorAll('.subpane').forEach(p => p.classList.remove('active'));
+      const targetPane = document.getElementById(targetSubId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    }
+
+    /* ========================================================
+       DETALLE INTERACTIVO DE LAS 5 FASES DE TVD (AGN)
+       ======================================================== */
+    const PHASES_DATA = [
+      {
+        num: 1,
+        title: "Fase 1: Compilación e Investigación Histórica-Institucional",
+        badge: "FUNDAMENTO AGN",
+        content: `
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Investigación jurídica e institucional para reconstruir la historia del organismo productor a través del tiempo. Se analizan decretos, resoluciones, leyes de creación, modificaciones de estructura, organigramas y manuales de funciones.
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>Delimitación de Periodos:</b> Identificación de los quiebres estructurales en el organigrama para fijar cortes temporales que jamás deben mezclarse.</li>
+            <li><b>Cuadro de Evolución Orgánica:</b> Mapeo de cómo las funciones cambiaron de dependencia a lo largo de las reformas administrativas.</li>
+          </ul>
+        `
+      },
+      {
+        num: 2,
+        title: "Fase 2: Diagnóstico Físico y Archivístico Integral",
+        badge: "CENSO Y SALUBRIDAD",
+        content: `
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Inspección in situ para determinar con exactitud el estado del fondo acumulado:
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>Cuantificación Métrica:</b> Medición lineal en metros (1.500 m.l. identificados en el fondo).</li>
+            <li><b>Inspección Biológica:</b> Muestreo microbiológico para aislar hongos patógenos, bacterias e insectos bibliófagos (termitas, pececillos de plata).</li>
+            <li><b>Condiciones Ambientales:</b> Registro de temperatura, humedad relativa, luminosidad y filtraciones en el depósito.</li>
+          </ul>
+        `
+      },
+      {
+        num: 3,
+        title: "Fase 3: Formulación del Plan de Archivo Institucional (PAI) e Intervención",
+        badge: "PLANIFICACIÓN Y BIOSEGURIDAD",
+        content: `
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Documento de planificación integral que establece:
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>Cronograma y Recursos:</b> Tiempos por cuadrilla de archivistas, insumos desacidificados y transporte.</li>
+            <li><b>Protocolo de Bioseguridad:</b> Dotación obligatoria de EPP Nivel 3 (mascarillas con filtro contra vapores y esporas HEPA / N95, trajes tyvek desechables, guantes de nitrilo).</li>
+            <li><b>Área de Aislamiento:</b> Delimitación física de zona de cuarentena y desinfección preventiva para evitar contaminación cruzada.</li>
+          </ul>
+        `
+      },
+      {
+        num: 4,
+        title: "Fase 4: Ejecución Operativa del Proceso Archivístico",
+        badge: "OPERACIÓN Y FUID",
+        content: `
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Intervención técnica directa sobre los documentos:
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>Limpieza y Desinfección en Seco:</b> Retiro mecánico de polvo y esporas con brochas de cerda suave y aspiradoras con filtro de agua o HEPA.</li>
+            <li><b>Hoja Testigo:</b> Retiro preventivo de documentos con biodeterioro activo dejando en su lugar la hoja testigo de trazabilidad foliada.</li>
+            <li><b>Clasificación Orgánica:</b> Reconstrucción de series según el organigrama histórico del periodo analizado.</li>
+            <li><b>Foliación y Elaboración de FUID:</b> Foliación técnica a lápiz HB en la esquina superior derecha y registro en 3 FUIDs independientes.</li>
+          </ul>
+        `
+      },
+      {
+        num: 5,
+        title: "Fase 5: Valoración Secundaria y Elaboración de la Propuesta de TVD",
+        badge: "DISPOSICIÓN FINAL",
+        content: `
+          <p style="color: var(--text-dim); margin-bottom: 12px;">
+            Juicio analítico multidisciplinario para dictaminar el destino final de los documentos:
+          </p>
+          <ul class="cyber-list mono">
+            <li><b>Valores Primarios:</b> Administrativo, fiscal, contable, legal y técnico.</li>
+            <li><b>Valores Secundarios:</b> Histórico, científico y cultural (patrimonio nacional).</li>
+            <li><b>Disposición Final Asignada:</b> Conservación Total (CT), Selección (S) o Eliminación (E) fundamentada en acto administrativo.</li>
+          </ul>
+        `
+      }
+    ];
+
+    function showPhaseDetail(phaseNum) {
+      audio.playBlip(620);
+      const data = PHASES_DATA[phaseNum - 1];
+      if (!data) return;
+
+      document.querySelectorAll('.phase-step').forEach((step, idx) => {
+        step.classList.toggle('active', idx === phaseNum - 1);
+      });
+
+      const titleEl = document.getElementById('phaseCardTitle');
+      const bodyEl = document.getElementById('phaseCardBody');
+      if (titleEl && bodyEl) {
+        titleEl.innerHTML = `<span>${data.title}</span><span class="card-tag mono">${data.badge}</span>`;
+        bodyEl.innerHTML = data.content;
+      }
+    }
+
+    /* ========================================================
+       SIMULADOR INTERACTIVO DE MATRIZ DE RIESGO 5x5
+       ======================================================== */
+    function selectMatrixRisk(prob, impact, label, action) {
+      audio.playBlip(740);
+      const tag = document.getElementById('riskSelectedTag');
+      const level = document.getElementById('riskSimLevel');
+      const desc = document.getElementById('riskSimDesc');
+      const act = document.getElementById('riskSimAction');
+
+      if (tag) tag.textContent = `P: ${prob} · I: ${impact}`;
+      if (level) level.textContent = label;
+      if (desc) desc.textContent = `Puntuación de criticidad calculada: ${prob * impact} puntos.`;
+      if (act) act.textContent = action;
+    }
+
+    /* ========================================================
+       BÚSQUEDA RÁPIDA HUD
+       ======================================================== */
+    function handleSearch(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return;
+
+      const searchableSections = [
+        { mod: 'mod0', terms: ['resumen', 'convergencia', 'articulación', 'matriz', 'ley 594', 'acuerdo 004', '1500'] },
+        { mod: 'mod1', terms: ['iso 30301', 'sgd', 'msr', 'clausula 4', 'liderazgo', 'planificacion', 'anexo a', 'metadatos', 'disposicion'] },
+        { mod: 'mod2', terms: ['tvd', 'agn', 'radicado 2-2015-02615', 'fuid', '90 dias', 'convalidacion', 'articulo 8', 'articulo 11', 'fases'] },
+        { mod: 'mod3', terms: ['iso 31000', 'riesgo', 'risk owner', 'principios', 'framework', 'matriz 5x5', 'probabilidad', 'consecuencia'] },
+        { mod: 'mod4', terms: ['caso practico', '1500 ml', 'biologico', 'hoja testigo', 'acta 005', 'resolucion 0420', '3 periodos'] },
+        { mod: 'mod5', terms: ['video', 'plan de integracion', 'transmisión', 'audiovisual', 'multimedia', 'proyeccion', 'reproductor', 'film'] }
+      ];
+
+      for (const item of searchableSections) {
+        if (item.terms.some(t => t.includes(q) || q.includes(t))) {
+          navigateTo(item.mod);
+          break;
+        }
+      }
+    }
+
+    /* ========================================================
+       REPRODUCTOR DE VIDEO CIBERNÉTICO HUD
+       ======================================================== */
+    const planVideo = document.getElementById('planVideo');
+    const btnVidPlayPause = document.getElementById('btnVidPlayPause');
+    const vidProgressBar = document.getElementById('vidProgressBar');
+    const vidTimeCounter = document.getElementById('vidTimeCounter');
+    const hudTimeDisplay = document.getElementById('hudTimeDisplay');
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function togglePlayVideo() {
+      audio.playBlip(700);
+      if (!planVideo) return;
+      if (planVideo.paused || planVideo.ended) {
+        planVideo.play().then(() => {
+          if (btnVidPlayPause) btnVidPlayPause.innerHTML = '⏸ PAUSAR';
+        }).catch(err => console.log('Autoplay blocked:', err));
+      } else {
+        planVideo.pause();
+        if (btnVidPlayPause) btnVidPlayPause.innerHTML = '▶ REPRODUCIR';
+      }
+    }
+
+    function restartVideo() {
+      audio.playBlip(550);
+      if (!planVideo) return;
+      planVideo.currentTime = 0;
+      planVideo.play().then(() => {
+        if (btnVidPlayPause) btnVidPlayPause.innerHTML = '⏸ PAUSAR';
+      }).catch(() => {});
+    }
+
+    function skipVideo(delta) {
+      audio.playBlip(620);
+      if (!planVideo) return;
+      planVideo.currentTime = Math.max(0, Math.min(planVideo.duration || 0, planVideo.currentTime + delta));
+    }
+
+    function seekVideo(seconds) {
+      audio.playBlip(780);
+      if (!planVideo) return;
+      planVideo.currentTime = seconds;
+      planVideo.play().then(() => {
+        if (btnVidPlayPause) btnVidPlayPause.innerHTML = '⏸ PAUSAR';
+      }).catch(() => {});
+    }
+
+    function scrubVideo(event) {
+      if (!planVideo || !planVideo.duration) return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const pos = (event.clientX - rect.left) / rect.width;
+      planVideo.currentTime = Math.max(0, Math.min(planVideo.duration, pos * planVideo.duration));
+    }
+
+    function setVideoSpeed(speed, btn) {
+      audio.playBlip(640);
+      if (!planVideo) return;
+      planVideo.playbackRate = speed;
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleVideoFullscreen() {
+      audio.playBlip(880);
+      if (!planVideo) return;
+      if (planVideo.requestFullscreen) {
+        planVideo.requestFullscreen();
+      } else if (planVideo.webkitRequestFullscreen) {
+        planVideo.webkitRequestFullscreen();
+      }
+    }
+
+    if (planVideo) {
+      planVideo.addEventListener('timeupdate', () => {
+        const current = planVideo.currentTime;
+        const total = planVideo.duration || 0;
+        const percent = total > 0 ? (current / total) * 100 : 0;
+        if (vidProgressBar) vidProgressBar.style.width = `${percent}%`;
+        const timeStr = `${formatTime(current)} / ${formatTime(total)}`;
+        if (vidTimeCounter) vidTimeCounter.textContent = timeStr;
+        if (hudTimeDisplay) hudTimeDisplay.textContent = timeStr;
+      });
+
+      planVideo.addEventListener('play', () => {
+        if (btnVidPlayPause) btnVidPlayPause.innerHTML = '⏸ PAUSAR';
+      });
+
+      planVideo.addEventListener('pause', () => {
+        if (btnVidPlayPause) btnVidPlayPause.innerHTML = '▶ REPRODUCIR';
+      });
+
+      planVideo.addEventListener('loadedmetadata', () => {
+        const timeStr = `00:00 / ${formatTime(planVideo.duration)}`;
+        if (vidTimeCounter) vidTimeCounter.textContent = timeStr;
+        if (hudTimeDisplay) hudTimeDisplay.textContent = timeStr;
+      });
+    }
+
+    /* ========================================================
+       CONTROLES DE TECLADO (FLECHAS, F, M, ESC)
+       ======================================================== */
+    window.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if (e.key === ' ' && MODULE_SLIDES[currentModuleIdx] === 'mod5') {
+        e.preventDefault();
+        togglePlayVideo();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        togglePresentationMode();
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleSound();
+      } else if (e.key === 'Escape' && isPresentationActive) {
+        togglePresentationMode();
+      }
+    });
+
+    /* ========================================================
+       ANIMACIÓN TELEMÉTRICA DE CONTADORES NUMÉRICOS
+       ======================================================== */
+    function animateNumbers(container = document) {
+      const counters = container.querySelectorAll('.count-num');
+      counters.forEach(counter => {
+        const target = parseFloat(counter.getAttribute('data-target'));
+        const duration = 600;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeOut = 1 - (1 - progress) * (1 - progress);
+          const currentVal = target * easeOut;
+
+          counter.textContent = Math.round(currentVal).toLocaleString('es-CO');
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+        requestAnimationFrame(update);
+      });
+    }
+
+    /* ========================================================
+       INICIALIZACIÓN AL CARGAR
+       ======================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      animateNumbers();
+      updatePresProgress();
+
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && isPresentationActive) {
+          togglePresentationMode();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

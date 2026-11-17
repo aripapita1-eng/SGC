@@ -1,0 +1,6 @@
+{
+  "name": "SENA · Gestión Documental Integrada",
+  "description": "Plataforma ciberpunk futurista de comando documental para el SENA: SGD ISO 30301, Tablas de Valoración Documental (TVD / AGN) y Gestión de Riesgos NTC-ISO 31000.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
